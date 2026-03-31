@@ -1324,16 +1324,27 @@ body {
     padding-left: 0.3rem !important;
   }
 
+  /* Đổi chiến thuật từ Grid thuần sang Flex Container để bọc chặt chiều rộng (Nuclear Fix OOM) */
   .comic-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1.5rem !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    padding: 0 0.5rem !important;
     margin-top: 1rem !important;
-    padding: 0 1rem !important;
   }
 
+  /* Ép mọi thẻ con buộc phải bằng 50% khung lưới trừ hao gap, không ngoại lệ */
   .comic-grid > div {
+    width: calc(50% - 0.25rem) !important;
+    max-width: 50% !important;
+    flex: 0 0 auto !important;
     min-width: 0;
     overflow: hidden;
+  }
+
+  .comic-grid .comic-card {
+    display: block !important;
+    width: 100% !important;
   }
 
   .hot-carousel-img-wrapper {
