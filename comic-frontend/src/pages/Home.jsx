@@ -328,10 +328,12 @@ const Home = () => {
                       <MessageCircle size={20} /> Bình Luận Gần Đây
                   </h5>
                   <div className="d-flex flex-column gap-3 custom-scrollbar" style={{maxHeight: '400px', overflowY: 'auto', paddingRight: '10px'}}>
-                      {recentComments.length === 0 ? (
-                          <div className="text-secondary small text-center p-3">Chưa có bình luận nào.</div>
-                      ) : (
-                          recentComments.map(cmt => (
+                      {(() => {
+                          const displayComments = recentComments.filter(cmt => contentMode === 'DEMON' ? cmt.comic?.isAdult : !cmt.comic?.isAdult);
+                          if (displayComments.length === 0) {
+                              return <div className="text-secondary small text-center p-3">Chưa có bình luận nào.</div>;
+                          }
+                          return displayComments.map(cmt => (
                               <div key={cmt.id} className="p-3 mb-2 shadow-sm" style={{background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '16px'}}>
                                   <div className="d-flex align-items-center gap-2 mb-2">
                                       <img src={cmt.user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${cmt.user?.username}`} 
@@ -357,8 +359,8 @@ const Home = () => {
                                       </span>
                                   </div>
                               </div>
-                          ))
-                      )}
+                          ));
+                      })()}
                   </div>
               </div>
 
