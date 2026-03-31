@@ -307,8 +307,8 @@ const Home = () => {
                           >
                               <div className="fw-bold fs-6 text-secondary" style={{width: '20px', textAlign: 'center'}}>{index + 1}</div>
                               <img src={comic.coverUrl} alt={comic.title} 
-                                   className="rounded flex-shrink-0" 
-                                   style={{width: '38px', height: '50px', objectFit: 'cover'}} loading="lazy" decoding="async" />
+                                   className="rounded flex-shrink-0 top-comic-img-fluid" 
+                                   loading="lazy" decoding="async" />
                               <div className="flex-grow-1" style={{ minWidth: 0 }}>
                                   <h6 className="mb-0 text-truncate fw-bold" style={{fontSize: '0.85rem'}}>{comic.title}</h6>
                                   <div className="text-secondary d-flex align-items-center gap-1 text-truncate mt-1" style={{fontSize: '0.7rem'}}>
@@ -337,8 +337,8 @@ const Home = () => {
                                   <div className="d-flex align-items-center gap-2 mb-2">
                                       <img src={cmt.user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${cmt.user?.username}`} 
                                            alt="avatar" 
-                                           className="rounded-circle flex-shrink-0" 
-                                           style={{width: '24px', height: '24px', objectFit: 'cover'}} loading="lazy" decoding="async" />
+                                           className="rounded-circle flex-shrink-0 comment-avatar-fluid" 
+                                           loading="lazy" decoding="async" />
                                       <div className="fw-bold text-truncate flex-grow-1" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>{cmt.user?.username || 'Ẩn danh'}</div>
                                       <span className="flex-shrink-0" style={{fontSize: '0.65rem', color: 'var(--text-secondary)'}}>
                                           {new Date(cmt.createdAt).toLocaleDateString('vi-VN')}
