@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { scrapeComicList, scrapeComicDetail, scrapeChapterImages, searchComic } from '../services/scraperService';
 import * as mangaDexAPI from '../services/mangadexService';
 import * as damconuongAPI from '../services/damconuongService';
+import * as hentaivnxAPI from '../services/hentaivnxService';
 import { LogOut, RefreshCw, LayoutGrid, CheckCircle, DatabaseZap, Search, Eye, AlertTriangle, ChevronRight, DownloadCloud, Layers, Globe } from 'lucide-react';
 import axios from 'axios';
 import '../style/admin.css';
@@ -83,6 +84,7 @@ const AdminDashboard = () => {
             if (sourceAPI === 'otruyen') data = await scrapeComicList(fetchType);
             else if (sourceAPI === 'mangadex') data = await mangaDexAPI.scrapeComicList(fetchType);
             else if (sourceAPI === 'damconuong') data = await damconuongAPI.scrapeComicList();
+            else if (sourceAPI === 'hentaivnx') data = await hentaivnxAPI.scrapeComicList(fetchType);
             
             setScrapedList(data);
         } catch (error) {
@@ -106,6 +108,7 @@ const AdminDashboard = () => {
             if (sourceAPI === 'otruyen') data = await searchComic(searchQuery);
             else if (sourceAPI === 'mangadex') data = await mangaDexAPI.searchComic(searchQuery);
             else if (sourceAPI === 'damconuong') data = await damconuongAPI.searchComic(searchQuery);
+            else if (sourceAPI === 'hentaivnx') data = await hentaivnxAPI.searchComic(searchQuery);
             
             setScrapedList(data);
         } catch (error) {
@@ -133,7 +136,10 @@ const AdminDashboard = () => {
             else if (sourceAPI === 'mangadex') detail = await mangaDexAPI.scrapeComicDetail(comic.url);
             else if (sourceAPI === 'damconuong') {
                 detail = await damconuongAPI.scrapeComicDetail(comic.url);
-                setIsAdult(true); // Tự động tick 18+ nếu nguồn là Damconuong
+                setIsAdult(true);
+            } else if (sourceAPI === 'hentaivnx') {
+                detail = await hentaivnxAPI.scrapeComicDetail(comic.url);
+                setIsAdult(true);
             }
             
             setSelectedComic({
@@ -243,6 +249,7 @@ const AdminDashboard = () => {
                 if (sourceAPI === 'otruyen') imageUrls = await scrapeChapterImages(ch.url);
                 else if (sourceAPI === 'mangadex') imageUrls = await mangaDexAPI.scrapeChapterImages(ch.url);
                 else if (sourceAPI === 'damconuong') imageUrls = await damconuongAPI.scrapeChapterImages(ch.url);
+                else if (sourceAPI === 'hentaivnx') imageUrls = await hentaivnxAPI.scrapeChapterImages(ch.url);
                 
                 importPayload.chapters.push({
                     chapterNumber: finalChapterNumber,
@@ -346,6 +353,13 @@ const AdminDashboard = () => {
                                     onChange={() => { setSourceAPI('damconuong'); setScrapedList([]); setSearchQuery(''); }} />
                                 <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'damconuong' ? 'btn-warning text-dark shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnDamconuong" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
                                     🔞 Dâm Cô Nương
+                                </label>
+
+                                <input type="radio" className="btn-check" name="sourceAPI" id="btnHentaivnx" autoComplete="off" 
+                                    checked={sourceAPI === 'hentaivnx'} 
+                                    onChange={() => { setSourceAPI('hentaivnx'); setScrapedList([]); setSearchQuery(''); }} />
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'hentaivnx' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnHentaivnx" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                    🔥 HentaiVNX
                                 </label>
                             </div>
 
