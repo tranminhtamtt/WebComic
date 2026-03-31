@@ -59,11 +59,22 @@ public class AdminImportController {
     public ResponseEntity<?> importComic(@RequestBody Map<String, Object> data) {
         try {
             String title = (String) data.get("title");
-            String slug = (String) data.getOrDefault("slug", title.toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+            String rawSlug = title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+            // Fallback: if slug is empty (non-ASCII title like Japanese/Korean), use hash of title
+            if (rawSlug.isEmpty() || rawSlug.equals("-")) {
+                rawSlug = "comic-" + Integer.toHexString(title.hashCode());
+            }
+            String slug = (String) data.getOrDefault("slug", rawSlug);
             String coverUrl = (String) data.getOrDefault("coverUrl", "");
             String description = (String) data.getOrDefault("description", "");
             String author = (String) data.getOrDefault("author", "Đang cập nhật");
             Boolean isAdult = (Boolean) data.getOrDefault("isAdult", false);
+
+            // Truncate fields to match DB column limits to prevent "Data too long" errors
+            if (title.length() > 255) title = title.substring(0, 255);
+            if (slug.length() > 255) slug = slug.substring(0, 255);
+            if (author.length() > 100) author = author.substring(0, 100);
+            if (coverUrl.length() > 500) coverUrl = coverUrl.substring(0, 500);
 
             // Create or update Comic (Upsert)
             Comic comic = comicService.findBySlug(slug).orElse(null);
@@ -174,6 +185,7 @@ public class AdminImportController {
                 "comicId", comic.getId()
             ));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of(
                 "success", false,
                 "message", "Lỗi import: " + e.getMessage()

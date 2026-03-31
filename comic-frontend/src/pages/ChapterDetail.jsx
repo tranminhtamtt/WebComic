@@ -160,17 +160,27 @@ const ChapterDetail = () => {
             <h3>Chapter này chưa có ảnh nào.</h3>
           </div>
         ) : (
-          images.map((img) => (
+          images.map((img) => {
+            // Route images through backend proxy to bypass CDN hotlink protection (Referer check)
+            const needsProxy = img.imageUrl && (
+              img.imageUrl.includes('2tcdn') || img.imageUrl.includes('hentaivnx') ||
+              img.imageUrl.includes('sayhentai') || img.imageUrl.includes('pubtranxzyzz')
+            );
+            const imgSrc = needsProxy 
+              ? `${import.meta.env.VITE_API_BASE_URL}/proxy/image?url=${encodeURIComponent(img.imageUrl)}`
+              : img.imageUrl;
+            return (
             <img 
               key={img.id} 
-              src={img.imageUrl} 
+              src={imgSrc} 
               alt={`Page ${img.pageNumber}`} 
               className="comic-page-img" 
               loading={lazyLoad ? "lazy" : "eager"} 
               decoding={lazyLoad ? "async" : "sync"}
               referrerPolicy="no-referrer"
             />
-          ))
+            );
+          })
         )}
       </div>
 

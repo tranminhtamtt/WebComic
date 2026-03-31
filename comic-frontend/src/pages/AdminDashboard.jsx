@@ -291,7 +291,8 @@ const AdminDashboard = () => {
             }
 
         } catch (error) {
-            setErrorMsg('Lỗi quá trình import: ' + error.message);
+            const serverMsg = error.response?.data?.message || error.message;
+            setErrorMsg('Lỗi quá trình import: ' + serverMsg);
             setProgress({ state: 'Tiến trình bị gián đoạn', percent: 0 });
         }
     };
