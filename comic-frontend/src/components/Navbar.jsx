@@ -124,7 +124,7 @@ const Navbar = () => {
     }}>
       <div className="nav-brand-group">
         <div className="nav-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-
+          <img src="/logo.png" alt="WebComic Logo" style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} />
           <span>WebComic</span>
         </div>
 
