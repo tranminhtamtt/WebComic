@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../configurations/ThemeContext';
 import { ChevronLeft, ChevronRight, Home, List, ArrowUp } from 'lucide-react';
 import { cachedFetch } from '../services/CacheService';
+import { proxyImageUrl } from '../utils/imageProxy';
 
 const ChapterDetail = () => {
   const { id, chapterId } = useParams();
@@ -160,27 +161,17 @@ const ChapterDetail = () => {
             <h3>Chapter này chưa có ảnh nào.</h3>
           </div>
         ) : (
-          images.map((img) => {
-            // Route images through backend proxy to bypass CDN hotlink protection (Referer check)
-            const needsProxy = img.imageUrl && (
-              img.imageUrl.includes('2tcdn') || img.imageUrl.includes('hentaivnx') ||
-              img.imageUrl.includes('sayhentai') || img.imageUrl.includes('pubtranxzyzz')
-            );
-            const imgSrc = needsProxy 
-              ? `${import.meta.env.VITE_API_BASE_URL}/proxy/image?url=${encodeURIComponent(img.imageUrl)}`
-              : img.imageUrl;
-            return (
+          images.map((img) => (
             <img 
               key={img.id} 
-              src={imgSrc} 
+              src={proxyImageUrl(img.imageUrl)} 
               alt={`Page ${img.pageNumber}`} 
               className="comic-page-img" 
               loading={lazyLoad ? "lazy" : "eager"} 
               decoding={lazyLoad ? "async" : "sync"}
               referrerPolicy="no-referrer"
             />
-            );
-          })
+          ))
         )}
       </div>
 

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTheme } from '../configurations/ThemeContext';
 import { Eye, Star, Clock, BookOpen, ChevronRight, Bookmark, BookmarkPlus, Send } from 'lucide-react';
 import { useAuth } from '../configurations/AuthContext';
+import { proxyImageUrl } from '../utils/imageProxy';
 import { cachedFetch } from '../services/CacheService';
 
 const ComicDetail = () => {
@@ -115,7 +116,7 @@ const ComicDetail = () => {
       <div className="comic-detail-container">
         {/* Left: Cover */}
         <div className="comic-detail-cover">
-          <img src={comic.coverUrl} alt={comic.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
+          <img src={proxyImageUrl(comic.coverUrl)} alt={comic.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
         </div>
 
         {/* Right: Info */}
