@@ -14,6 +14,7 @@ const ChapterDetail = () => {
   const [allChapters, setAllChapters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showScroll, setShowScroll] = useState(false);
+  const [lazyLoad, setLazyLoad] = useState(true);
   const topAnchorRef = React.useRef(null);
 
   useEffect(() => {
@@ -96,6 +97,26 @@ const ChapterDetail = () => {
         </div>
         
         <div className="top-bar-right">
+          {/* Nút Tắt/Bật Lazy Load */}
+          <button 
+            className="top-bar-btn d-none d-md-block" 
+            onClick={() => setLazyLoad(!lazyLoad)}
+            title={lazyLoad ? "Đang bật Tải từng phần (Lazy). Bấm để Tải tất cả ảnh cùng lúc" : "Đang tải cả Chapter. Bấm để bật lại Tải chậm"}
+            style={{ 
+              marginRight: '12px', 
+              fontSize: '0.8rem', 
+              padding: '4px 10px', 
+              borderRadius: '6px',
+              border: `1px solid ${lazyLoad ? 'var(--text-secondary)' : '#0dcaf0'}`,
+              color: lazyLoad ? 'var(--text-secondary)' : '#0dcaf0',
+              backgroundColor: 'transparent',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {lazyLoad ? "⚡ Tải Chậm" : "🚀 Tải Full"}
+          </button>
+          
           <button 
             className="top-bar-btn" 
             onClick={() => prevChapter && navigate(`/comic/${id}/chapter/${prevChapter.id}`)}
@@ -143,7 +164,8 @@ const ChapterDetail = () => {
               src={img.imageUrl} 
               alt={`Page ${img.pageNumber}`} 
               className="comic-page-img" 
-              loading="lazy" decoding="async"
+              loading={lazyLoad ? "lazy" : "eager"} 
+              decoding={lazyLoad ? "async" : "sync"}
             />
           ))
         )}
