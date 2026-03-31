@@ -19,5 +19,5 @@ COPY --from=builder /app/target/*.jar app.jar
 # Expose port (Render sẽ tự gán biến PORT từ application.properties)
 EXPOSE 8080
 
-# Chạy ứng dụng
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Chạy ứng dụng - Giới hạn RAM cho Render Free Tier (512MB)
+ENTRYPOINT ["java", "-Xmx400m", "-Xms256m", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
