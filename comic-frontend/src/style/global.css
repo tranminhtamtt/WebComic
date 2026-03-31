@@ -1331,6 +1331,11 @@ body {
     padding: 0 1rem !important;
   }
 
+  .comic-grid > div {
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .hot-carousel-img-wrapper {
     width: 135px !important;
     height: 180px !important;
