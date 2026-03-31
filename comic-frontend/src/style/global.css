@@ -1326,14 +1326,9 @@ body {
 
   .comic-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
+    gap: 1.5rem !important;
     margin-top: 1rem !important;
-    padding: 0 0.5rem !important;
-  }
-
-  .comic-grid .comic-card {
-    max-width: 130px !important;
-    margin: 0 auto !important;
+    padding: 0 1rem !important;
   }
 
   .hot-carousel-img-wrapper {
