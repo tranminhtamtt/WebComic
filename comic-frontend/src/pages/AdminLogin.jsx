@@ -34,6 +34,7 @@ const AdminLogin = () => {
             if (res.ok) {
                 const data = await res.json();
                 if (data.role === 'ADMIN') {
+                    if (data.token) localStorage.setItem('webcomic_token', data.token);
                     sessionStorage.setItem('isAdmin', 'true');
                     navigate('/admin/dashboard');
                 } else {
