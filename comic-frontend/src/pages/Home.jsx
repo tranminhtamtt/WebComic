@@ -215,12 +215,12 @@ const Home = () => {
           
           {/* CỘT TRÁI: Cập Nhật Gần Đây */}
           <div className="col-lg-8">
-              <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 border-bottom border-secondary border-opacity-25 pb-2 gap-2">
-                  <div className="d-flex align-items-center flex-wrap gap-2">
-                      <h5 className="fw-bold d-flex align-items-center gap-2 m-0 text-info fs-6 text-nowrap me-2">
+              <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 border-bottom border-secondary border-opacity-25 pb-2 gap-2" style={{ maxWidth: '100%', minWidth: 0 }}>
+                  <div className="d-flex align-items-center flex-nowrap gap-2 w-100" style={{ minWidth: 0 }}>
+                      <h5 className="fw-bold d-flex align-items-center gap-2 m-0 text-info fs-6 text-nowrap flex-shrink-0">
                           <Clock size={20} /> Cập Nhật Gần Đây
                       </h5>
-                      <div className="d-flex gap-2 align-items-center custom-scrollbar-hide" style={{overflowX: 'auto', whiteSpace: 'nowrap', padding: '0.2rem 0', maxWidth: '100%'}}>
+                      <div className="d-flex gap-2 align-items-center custom-scrollbar-hide flex-grow-1" style={{overflowX: 'auto', whiteSpace: 'nowrap', padding: '0.2rem 0', minWidth: 0}}>
                           <span 
                               className={`badge cursor-pointer px-2 py-1 bg-success text-light shadow-sm`}
                               onClick={() => {setAppliedCategories([]); setSelectedCategories([]); setRecentPage(0);}}
