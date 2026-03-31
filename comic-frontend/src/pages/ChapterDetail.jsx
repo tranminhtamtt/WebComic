@@ -168,6 +168,7 @@ const ChapterDetail = () => {
               className="comic-page-img" 
               loading={lazyLoad ? "lazy" : "eager"} 
               decoding={lazyLoad ? "async" : "sync"}
+              referrerPolicy="no-referrer"
             />
           ))
         )}

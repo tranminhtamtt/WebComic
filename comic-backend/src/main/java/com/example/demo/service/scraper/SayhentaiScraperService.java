@@ -63,14 +63,7 @@ public class SayhentaiScraperService {
                 .mapToObj(page -> CompletableFuture.runAsync(() -> {
                     try {
                         String fullUrl = BASE_URL + path + page;
-                        Document doc = Jsoup.connect(fullUrl)
-                                .userAgent(USER_AGENT)
-                                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
-                                .header("Cache-Control", "no-cache")
-                                .header("Connection", "keep-alive")
-                                .timeout(20000)
-                                .get();
+                        Document doc = getDocument(fullUrl);
 
                         List<Map<String, String>> pageComics = parseComicCards(doc, seenUrls);
                         allComics.addAll(pageComics);
@@ -90,31 +83,22 @@ public class SayhentaiScraperService {
     private List<Map<String, String>> parseComicCards(Document doc, Set<String> globalSeenUrls) {
         List<Map<String, String>> comics = new ArrayList<>();
 
-        Elements blocks = doc.select(".page-item-detail, .item-summary, .post-title, .manga-item");
-        if (blocks.isEmpty()) {
-            blocks = doc.select("a[href*=truyen-]"); 
-        }
-
-        for (Element link : doc.select("a[href*=" + BASE_URL + "/truyen-], a[href^=/truyen-]")) {
+        Elements cards = doc.select(".page-item-detail, .item.col-4");
+        for (Element card : cards) {
+            Element link = card.selectFirst("a[href*=/truyen-]");
+            if (link == null) continue;
             String url = link.attr("abs:href");
-
-            // Bỏ qua link chapter 
             if (url.contains("/chuong-") || url.contains("/chapter-")) continue;
-
-            if (!url.endsWith(".html") && !url.contains(".html")) {
-                if (!url.matches(".*truyen-[^/]+/?$")) continue; // Avoid bad links
-            }
-
             if (!globalSeenUrls.add(url)) continue;
 
-            // Find an image anywhere near the link
-            Element parent = link.parent();
-            while (parent != null && parent.select("img").isEmpty() && parent.parent() != null && parent.parent().select("img").size() < 5) {
-                parent = parent.parent();
+            String title = link.hasAttr("title") ? link.attr("title").trim() : link.text().trim();
+            if (title.isEmpty()) {
+                Element h3 = card.selectFirst(".post-title a, .line-2 a");
+                if (h3 != null) title = h3.text().trim();
             }
-            if (parent == null) parent = link;
-            
-            Element img = parent.selectFirst("img");
+            if (title.isEmpty()) title = "Truyện SayHentai";
+
+            Element img = card.selectFirst("img");
             String coverUrl = "";
             if (img != null) {
                 coverUrl = img.hasAttr("data-src") ? img.attr("data-src") : img.attr("src");
@@ -123,16 +107,10 @@ public class SayhentaiScraperService {
             if (coverUrl.startsWith("//")) coverUrl = "https:" + coverUrl;
             if (coverUrl.startsWith("/")) coverUrl = BASE_URL + coverUrl;
 
-            String title = link.text().trim();
-            if (title.isEmpty() && img != null && img.hasAttr("alt")) title = img.attr("alt");
-            if (title.isEmpty()) title = "Truyện SayHentai";
-
             String latestChapter = "N/A";
-            if (parent != null) {
-                Elements chapterLinks = parent.select("a[href*=/chuong-], a[href*=/chapter-]");
-                if (!chapterLinks.isEmpty()) {
-                    latestChapter = chapterLinks.first().text().trim();
-                }
+            Element chap = card.selectFirst(".chapter-item a, .chapter a, .chapter-item span, .chapter span");
+            if (chap != null) {
+                latestChapter = chap.text().trim();
             }
 
             Map<String, String> comicObj = new HashMap<>();
@@ -149,51 +127,48 @@ public class SayhentaiScraperService {
     // 3. LẤY CHI TIẾT TRUYỆN + DANH SÁCH CHAPTER
     // =============================================
     public Map<String, Object> getComicDetail(String url) throws IOException {
-        Document doc = Jsoup.connect(url)
-                .userAgent(USER_AGENT)
-                .timeout(20000)
-                .get();
+        Document doc = getDocument(url);
 
         Map<String, Object> detail = new HashMap<>();
 
         String rawTitle = doc.title().replace(" - SayHentai", "").trim();
-        Element h1 = doc.selectFirst("h1");
+        Element h1 = doc.selectFirst(".post-title h1, h1");
         if (h1 != null && !h1.text().isEmpty()) {
             rawTitle = h1.text().trim();
         }
         detail.put("title", rawTitle);
 
         String coverUrl = "";
-        Element metaImg = doc.selectFirst("meta[property=og:image]");
-        if (metaImg != null && metaImg.hasAttr("content")) {
-            coverUrl = metaImg.attr("content");
+        Element img = doc.selectFirst(".summary_image img");
+        if (img != null) {
+            coverUrl = img.hasAttr("data-src") ? img.attr("data-src") : img.attr("src");
         }
         if (coverUrl.isEmpty()) {
-            Element img = doc.selectFirst(".summary_image img");
-            if (img != null) coverUrl = img.attr("src");
+            Element metaImg = doc.selectFirst("meta[property=og:image]");
+            if (metaImg != null && metaImg.hasAttr("content")) coverUrl = metaImg.attr("content");
         }
         if (coverUrl.startsWith("//")) coverUrl = "https:" + coverUrl;
         if (coverUrl.startsWith("/")) coverUrl = BASE_URL + coverUrl;
         detail.put("coverUrl", coverUrl);
 
         String description = "Không có thông tin nội dung.";
-        Element descEl = doc.selectFirst(".description-summary, .manga-excerpt, .post-content_item p");
+        Element descEl = doc.selectFirst(".description-summary, .summary__content, .manga-excerpt");
         if (descEl != null) {
             description = descEl.text().trim();
         }
         detail.put("description", description);
 
         String author = "Đang cập nhật";
-        Elements authorEls = doc.select(".author-content a");
-        if (!authorEls.isEmpty()) {
-            author = authorEls.text().trim();
+        Element authorEl = doc.selectFirst(".author-content a");
+        if (authorEl != null) {
+            author = authorEl.text().trim();
         }
         detail.put("author", author);
 
         List<Map<String, Object>> chapters = new ArrayList<>();
         Set<String> seenChapUrls = new HashSet<>();
         
-        Elements chapterLinks = doc.select("a[href*=" + BASE_URL + "/truyen-], a[href^=/truyen-]");
+        Elements chapterLinks = doc.select(".wp-manga-chapter a, .list-chapter a");
         for (Element a : chapterLinks) {
             String href = a.attr("abs:href");
             if (!href.contains("/chuong-") && !href.contains("/chapter-")) continue;
@@ -204,7 +179,10 @@ public class SayhentaiScraperService {
             
             String chapTitle = a.text().trim();
 
-            Matcher m = Pattern.compile("(?:chapter|chuong|chương)[\\s\\-]*?(\\d+(?:\\.\\d+)?)", Pattern.CASE_INSENSITIVE).matcher(chapTitle.isEmpty() ? href : chapTitle);
+            Matcher m = Pattern.compile("(?i)(?:chapter|chap|chuong|chương|tập|vol)[\\s\\-_]*?(\\d+(?:\\.\\d+)?)").matcher(chapTitle);
+            if (!m.find()) {
+                m = Pattern.compile("(?i)(?:chapter|chap|chuong|chương|tập|vol)[\\s\\-_]*?(\\d+(?:\\.\\d+)?)").matcher(href);
+            }
             if (m.find()) {
                 String numStr = m.group(1);
                 try {
@@ -220,24 +198,31 @@ public class SayhentaiScraperService {
             } else {
                 chapMap.put("chapterNumber", 0L);
             }
+            // Some titles are just "Chapter 1", let's use the full text if available
             chapMap.put("title", chapTitle.isEmpty() ? "Chapter " + chapMap.get("chapterNumber") : chapTitle);
             chapters.add(chapMap);
         }
 
-        chapters.sort((c1, c2) -> {
+        // Deduplicate using URL, not longValue which mangles 1.5 -> 1
+        Map<String, Map<String, Object>> uniqueChaptersMap = new LinkedHashMap<>();
+        for (Map<String, Object> ch : chapters) {
+            String u = (String) ch.get("url");
+            uniqueChaptersMap.putIfAbsent(u, ch);
+        }
+        
+        List<Map<String, Object>> finalChapters = new ArrayList<>(uniqueChaptersMap.values());
+        
+        // Sort ascending
+        finalChapters.sort((c1, c2) -> {
             Number n1 = (Number) c1.get("chapterNumber");
             Number n2 = (Number) c2.get("chapterNumber");
+            if (n1.doubleValue() == n2.doubleValue()) {
+                return 0;
+            }
             return Double.compare(n1.doubleValue(), n2.doubleValue());
         });
 
-        LinkedHashMap<Number, Map<String, Object>> uniqueChapters = new LinkedHashMap<>();
-        for (Map<String, Object> ch : chapters) {
-            Number n = (Number) ch.get("chapterNumber");
-            if (!uniqueChapters.containsKey(n.longValue())) {
-                uniqueChapters.put(n.longValue(), ch);
-            }
-        }
-        detail.put("chapters", new ArrayList<>(uniqueChapters.values()));
+        detail.put("chapters", finalChapters);
 
         return detail;
     }
@@ -246,27 +231,61 @@ public class SayhentaiScraperService {
     // 4. LẤY ẢNH CHAPTER
     // =============================================
     public List<String> getChapterImages(String chapterUrl) throws IOException {
-        Document doc = Jsoup.connect(chapterUrl)
-                .userAgent(USER_AGENT)
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .timeout(20000)
-                .get();
+        Document doc = getDocument(chapterUrl);
 
         List<String> images = new ArrayList<>();
 
-        Elements imgs = doc.select(".reading-content img, .page-break img");
+        Elements imgs = doc.select(".reading-detail img, .reading-content img, .page-break img, .chapter-content img");
         if (imgs.isEmpty()) {
-            imgs = doc.select("img");
+            imgs = doc.select("img[id^=image-]"); // sometimes they use ids for images
+            if (imgs.isEmpty()) imgs = doc.select("img");
         }
 
         for (Element img : imgs) {
-            String src = img.attr("data-src");
-            if (src.isEmpty()) src = img.attr("src");
-            if (src != null && !src.isEmpty() && !src.contains("logo") && !src.contains("avatar") && !src.startsWith("data:")) {
-                images.add(src.trim());
-            }
+            String src = img.hasAttr("data-src") ? img.attr("data-src") : img.attr("src");
+            if (src == null || src.isEmpty() || src.contains("logo") || src.contains("avatar") || src.startsWith("data:")) continue;
+            images.add(src.trim());
         }
 
         return images;
+    }
+
+    // =============================================
+    // HELPER: GET DOCUMENT WITH PROXY FALLBACK
+    // =============================================
+    private Document getDocument(String url) throws IOException {
+        try {
+            return Jsoup.connect(url)
+                    .userAgent(USER_AGENT)
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+                    .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                    .header("Cache-Control", "no-cache")
+                    .header("Connection", "keep-alive")
+                    .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
+                    .header("Sec-Ch-Ua-Mobile", "?0")
+                    .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                    .header("Sec-Fetch-Dest", "document")
+                    .header("Sec-Fetch-Mode", "navigate")
+                    .header("Sec-Fetch-Site", "none")
+                    .header("Sec-Fetch-User", "?1")
+                    .header("Upgrade-Insecure-Requests", "1")
+                    .timeout(20000)
+                    .get();
+        } catch (org.jsoup.HttpStatusException e) {
+            System.err.println("Direct connection failed for SayHentai. Status: " + e.getStatusCode() + ". Attempting proxy fallback... " + url);
+            try {
+                // Return via allorigins CORS proxy raw mode
+                return Jsoup.connect("https://api.allorigins.win/raw?url=" + java.net.URLEncoder.encode(url, "UTF-8"))
+                        .userAgent(USER_AGENT)
+                        .timeout(20000)
+                        .get();
+            } catch (Exception ex) {
+                System.err.println("AllOrigins proxy also failed. Attempting corsproxy.io...");
+                return Jsoup.connect("https://corsproxy.io/?" + url)
+                        .userAgent(USER_AGENT)
+                        .timeout(20000)
+                        .get();
+            }
+        }
     }
 }

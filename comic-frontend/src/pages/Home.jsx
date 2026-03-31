@@ -308,7 +308,7 @@ const Home = () => {
                               <div className="fw-bold fs-6 text-secondary" style={{width: '20px', textAlign: 'center'}}>{index + 1}</div>
                               <img src={comic.coverUrl} alt={comic.title} 
                                    className="rounded flex-shrink-0 top-comic-img-fluid" 
-                                   loading="lazy" decoding="async" />
+                                   loading="lazy" decoding="async" referrerPolicy="no-referrer" />
                               <div className="flex-grow-1" style={{ minWidth: 0 }}>
                                   <h6 className="mb-0 text-truncate fw-bold" style={{fontSize: '0.85rem'}}>{comic.title}</h6>
                                   <div className="text-secondary d-flex align-items-center gap-1 text-truncate mt-1" style={{fontSize: '0.7rem'}}>

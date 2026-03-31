@@ -115,7 +115,7 @@ const ComicDetail = () => {
       <div className="comic-detail-container">
         {/* Left: Cover */}
         <div className="comic-detail-cover">
-          <img src={comic.coverUrl} alt={comic.title} loading="lazy" decoding="async" />
+          <img src={comic.coverUrl} alt={comic.title} loading="lazy" decoding="async" referrerPolicy="no-referrer" />
         </div>
 
         {/* Right: Info */}
