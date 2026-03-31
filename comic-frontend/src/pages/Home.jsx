@@ -139,12 +139,12 @@ const Home = () => {
     }}>
       
       {/* 1. Hot Comics Marquee (Căng full width trong main-content) */}
-      <div className="mb-2" style={{ zIndex: 10, position: 'relative', margin: '0 -4rem', width: 'calc(100% + 8rem)' }}>
+      <div className="mb-2 hot-carousel-section" style={{ zIndex: 10, position: 'relative' }}>
 
           <div className="flex-grow-1 overflow-hidden">
             {hotComics.length > 0 && (
-                <div className="hot-marquee-container position-relative mb-0 px-4" style={{background: 'transparent', boxShadow: 'none', borderBottom: 'none'}}>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="hot-marquee-container position-relative mb-0 px-md-4 px-2" style={{background: 'transparent', boxShadow: 'none', borderBottom: 'none'}}>
+                  <div className="d-flex justify-content-between align-items-center mb-2 px-1">
                       <h5 className="fw-bold d-flex align-items-center gap-2 m-0 fs-6" style={{color: contentMode === 'DEMON' ? 'var(--demon-accent)' : 'var(--accent)'}}>
                           <TrendingUp size={20} /> Truyện Đọc Truyền Tay Hot Nhất
                       </h5>
@@ -220,32 +220,31 @@ const Home = () => {
                       <h5 className="fw-bold d-flex align-items-center gap-2 m-0 text-info fs-6 text-nowrap me-2">
                           <Clock size={20} /> Cập Nhật Gần Đây
                       </h5>
-                      <div className="d-flex flex-wrap gap-1 align-items-center">
+                      <div className="d-flex gap-2 align-items-center custom-scrollbar-hide" style={{overflowX: 'auto', whiteSpace: 'nowrap', padding: '0.2rem 0', maxWidth: '100%'}}>
                           <span 
                               className={`badge cursor-pointer px-2 py-1 bg-success text-light shadow-sm`}
                               onClick={() => {setAppliedCategories([]); setSelectedCategories([]); setRecentPage(0);}}
                               style={{
-                                  fontSize: '0.7rem', 
+                                  fontSize: '0.75rem', 
                                   opacity: 1, 
                                   border: appliedCategories.length === 0 ? '2px solid white' : '2px solid transparent'
                               }}
                           >
                               Tất Cả
                           </span>
-                          {categories.slice(0, 4).map((cat, idx) => {
+                          {categories.slice(0, 8).map((cat, idx) => {
                               const isSelected = appliedCategories.length === 1 && appliedCategories[0] === cat.id;
                               return (
                                   <span key={cat.id} 
                                         className={`badge cursor-pointer px-2 py-1 tag-color-${(idx % 4) + 1} text-light shadow-sm`}
                                         onClick={() => {
-                                            // Single select outdoors
                                             const newApplied = [cat.id];
                                             setAppliedCategories(newApplied);
                                             setSelectedCategories(newApplied);
                                             setRecentPage(0);
                                         }}
                                         style={{
-                                            fontSize: '0.7rem', 
+                                            fontSize: '0.75rem', 
                                             opacity: 1,
                                             border: isSelected ? '2px solid white' : '2px solid transparent'
                                         }}
@@ -254,7 +253,7 @@ const Home = () => {
                                   </span>
                               );
                           })}
-                          {categories.length > 4 && (
+                          {categories.length > 8 && (
                               <span className="badge bg-dark border border-secondary text-secondary cursor-pointer hover-bg-secondary px-2 py-1" 
                                     onClick={() => {
                                         setSelectedCategories(appliedCategories);
@@ -282,9 +281,9 @@ const Home = () => {
                   </div>
               </div>
               
-              <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3 mb-4">
+              <div className="comic-grid mb-4">
                   {newComics.slice(recentPage * ITEMS_PER_PAGE, (recentPage + 1) * ITEMS_PER_PAGE).map((comic) => (
-                      <div className="col" key={comic.id}>
+                      <div key={comic.id}>
                           <ComicCard comic={comic} />
                       </div>
                   ))}
