@@ -60,6 +60,7 @@ public class HentaivnxScraperService {
         List<CompletableFuture<Void>> futures = IntStream.rangeClosed(1, maxPages)
                 .mapToObj(page -> CompletableFuture.runAsync(() -> {
                     try {
+                        String fullUrl = BASE_URL + path + page;
                         Document doc = getDocument(fullUrl);
 
                         List<Map<String, String>> pageComics = parseComicCards(doc, seenUrls);
