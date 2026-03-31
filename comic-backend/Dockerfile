@@ -1,21 +1,13 @@
-# Stage 1: Build the application using Maven Wrapper
-FROM eclipse-temurin:21-jdk AS builder
+# Stage 1: Build the application using Maven Image
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Khuyến cáo cấu hình maven daemon để build nhanh hơn nếu có
-# Nhép file wrapper và pom.xml vào trước
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-
-# Cấp quyền thực thi cho Maven wrapper
-RUN chmod +x ./mvnw
-
-# Tải dependencies (lưu catch vào layer docker)
-RUN ./mvnw dependency:go-offline
-
-# Nhép toàn bộ code vào và build
+# Copy source code
+COPY pom.xml ./
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+
+# Build the application
+RUN mvn clean package -DskipTests
 
 # Stage 2: Create a minimal image
 FROM eclipse-temurin:21-jre
