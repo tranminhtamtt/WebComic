@@ -60,23 +60,7 @@ public class HentaivnxScraperService {
         List<CompletableFuture<Void>> futures = IntStream.rangeClosed(1, maxPages)
                 .mapToObj(page -> CompletableFuture.runAsync(() -> {
                     try {
-                        String fullUrl = BASE_URL + path + page;
-                        Document doc = Jsoup.connect(fullUrl)
-                                .userAgent(USER_AGENT)
-                                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
-                                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
-                                .header("Cache-Control", "no-cache")
-                                .header("Connection", "keep-alive")
-                                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
-                                .header("Sec-Ch-Ua-Mobile", "?0")
-                                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
-                                .header("Sec-Fetch-Dest", "document")
-                                .header("Sec-Fetch-Mode", "navigate")
-                                .header("Sec-Fetch-Site", "none")
-                                .header("Sec-Fetch-User", "?1")
-                                .header("Upgrade-Insecure-Requests", "1")
-                                .timeout(20000)
-                                .get();
+                        Document doc = getDocument(fullUrl);
 
                         List<Map<String, String>> pageComics = parseComicCards(doc, seenUrls);
                         allComics.addAll(pageComics);
@@ -143,22 +127,7 @@ public class HentaivnxScraperService {
     // 3. LẤY CHI TIẾT TRUYỆN + DANH SÁCH CHAPTER
     // =============================================
     public Map<String, Object> getComicDetail(String url) throws IOException {
-        Document doc = Jsoup.connect(url)
-                .userAgent(USER_AGENT)
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
-                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
-                .header("Cache-Control", "no-cache")
-                .header("Connection", "keep-alive")
-                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
-                .header("Sec-Ch-Ua-Mobile", "?0")
-                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
-                .header("Sec-Fetch-Dest", "document")
-                .header("Sec-Fetch-Mode", "navigate")
-                .header("Sec-Fetch-Site", "none")
-                .header("Sec-Fetch-User", "?1")
-                .header("Upgrade-Insecure-Requests", "1")
-                .timeout(20000)
-                .get();
+        Document doc = getDocument(url);
 
         Map<String, Object> detail = new HashMap<>();
 
@@ -310,22 +279,7 @@ public class HentaivnxScraperService {
     // 4. LẤY ẢNH CHAPTER
     // =============================================
     public List<String> getChapterImages(String chapterUrl) throws IOException {
-        Document doc = Jsoup.connect(chapterUrl)
-                .userAgent(USER_AGENT)
-                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
-                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
-                .header("Cache-Control", "no-cache")
-                .header("Connection", "keep-alive")
-                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
-                .header("Sec-Ch-Ua-Mobile", "?0")
-                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
-                .header("Sec-Fetch-Dest", "document")
-                .header("Sec-Fetch-Mode", "navigate")
-                .header("Sec-Fetch-Site", "none")
-                .header("Sec-Fetch-User", "?1")
-                .header("Upgrade-Insecure-Requests", "1")
-                .timeout(20000)
-                .get();
+        Document doc = getDocument(chapterUrl);
 
         List<String> images = new ArrayList<>();
 
@@ -371,6 +325,42 @@ public class HentaivnxScraperService {
     // =============================================
     // HELPERS
     // =============================================
+    private Document getDocument(String url) throws IOException {
+        try {
+            return Jsoup.connect(url)
+                    .userAgent(USER_AGENT)
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+                    .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                    .header("Cache-Control", "no-cache")
+                    .header("Connection", "keep-alive")
+                    .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
+                    .header("Sec-Ch-Ua-Mobile", "?0")
+                    .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                    .header("Sec-Fetch-Dest", "document")
+                    .header("Sec-Fetch-Mode", "navigate")
+                    .header("Sec-Fetch-Site", "none")
+                    .header("Sec-Fetch-User", "?1")
+                    .header("Upgrade-Insecure-Requests", "1")
+                    .timeout(20000)
+                    .get();
+        } catch (org.jsoup.HttpStatusException e) {
+            System.err.println("Direct connection failed for HentaiVNX. Status: " + e.getStatusCode() + ". Attempting proxy fallback... " + url);
+            try {
+                // Return via allorigins CORS proxy raw mode
+                return Jsoup.connect("https://api.allorigins.win/raw?url=" + java.net.URLEncoder.encode(url, "UTF-8"))
+                        .userAgent(USER_AGENT)
+                        .timeout(20000)
+                        .get();
+            } catch (Exception ex) {
+                System.err.println("AllOrigins proxy also failed. Attempting corsproxy.io...");
+                return Jsoup.connect("https://corsproxy.io/?" + url)
+                        .userAgent(USER_AGENT)
+                        .timeout(20000)
+                        .get();
+            }
+        }
+    }
+
     private String extractSlug(String url) {
         // From: https://www.hentaivnx.com/truyen-hentai/slug-name-123
         // Extract: slug-name (without trailing number ID)

@@ -4,6 +4,7 @@ import { scrapeComicList, scrapeComicDetail, scrapeChapterImages, searchComic } 
 import * as mangaDexAPI from '../services/mangadexService';
 import * as damconuongAPI from '../services/damconuongService';
 import * as hentaivnxAPI from '../services/hentaivnxService';
+import * as sayhentaiAPI from '../services/sayhentaiService';
 import { LogOut, RefreshCw, LayoutGrid, CheckCircle, DatabaseZap, Search, Eye, AlertTriangle, ChevronRight, DownloadCloud, Layers, Globe } from 'lucide-react';
 import axios from 'axios';
 import '../style/admin.css';
@@ -85,6 +86,7 @@ const AdminDashboard = () => {
             else if (sourceAPI === 'mangadex') data = await mangaDexAPI.scrapeComicList(fetchType);
             else if (sourceAPI === 'damconuong') data = await damconuongAPI.scrapeComicList();
             else if (sourceAPI === 'hentaivnx') data = await hentaivnxAPI.scrapeComicList(fetchType);
+            else if (sourceAPI === 'sayhentai') data = await sayhentaiAPI.scrapeComicList(fetchType);
             
             setScrapedList(data);
         } catch (error) {
@@ -109,6 +111,7 @@ const AdminDashboard = () => {
             else if (sourceAPI === 'mangadex') data = await mangaDexAPI.searchComic(searchQuery);
             else if (sourceAPI === 'damconuong') data = await damconuongAPI.searchComic(searchQuery);
             else if (sourceAPI === 'hentaivnx') data = await hentaivnxAPI.searchComic(searchQuery);
+            else if (sourceAPI === 'sayhentai') data = await sayhentaiAPI.searchComic(searchQuery);
             
             setScrapedList(data);
         } catch (error) {
@@ -139,6 +142,9 @@ const AdminDashboard = () => {
                 setIsAdult(true);
             } else if (sourceAPI === 'hentaivnx') {
                 detail = await hentaivnxAPI.scrapeComicDetail(comic.url);
+                setIsAdult(true);
+            } else if (sourceAPI === 'sayhentai') {
+                detail = await sayhentaiAPI.scrapeComicDetail(comic.url);
                 setIsAdult(true);
             }
             
@@ -250,6 +256,7 @@ const AdminDashboard = () => {
                 else if (sourceAPI === 'mangadex') imageUrls = await mangaDexAPI.scrapeChapterImages(ch.url);
                 else if (sourceAPI === 'damconuong') imageUrls = await damconuongAPI.scrapeChapterImages(ch.url);
                 else if (sourceAPI === 'hentaivnx') imageUrls = await hentaivnxAPI.scrapeChapterImages(ch.url);
+                else if (sourceAPI === 'sayhentai') imageUrls = await sayhentaiAPI.scrapeChapterImages(ch.url);
                 
                 importPayload.chapters.push({
                     chapterNumber: finalChapterNumber,
@@ -360,6 +367,13 @@ const AdminDashboard = () => {
                                     onChange={() => { setSourceAPI('hentaivnx'); setScrapedList([]); setSearchQuery(''); }} />
                                 <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'hentaivnx' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnHentaivnx" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
                                     🔥 HentaiVNX
+                                </label>
+
+                                <input type="radio" className="btn-check" name="sourceAPI" id="btnSayhentai" autoComplete="off" 
+                                    checked={sourceAPI === 'sayhentai'} 
+                                    onChange={() => { setSourceAPI('sayhentai'); setScrapedList([]); setSearchQuery(''); }} />
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'sayhentai' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnSayhentai" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                    🍇 SayHentai
                                 </label>
                             </div>
 
