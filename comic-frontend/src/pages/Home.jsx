@@ -301,19 +301,19 @@ const Home = () => {
                   <div className="d-flex flex-column gap-3">
                       {topRatedComics.map((comic, index) => (
                           <div key={comic.id} 
-                               className="d-flex align-items-center gap-3 p-2 rounded transition hover-bg-secondary cursor-pointer"
+                               className="d-flex align-items-center gap-2 p-2 rounded transition hover-bg-secondary cursor-pointer"
                                onClick={() => navigate(`/comic/${comic.id}`)}
                                style={{background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)'}}
                           >
-                              <div className="fw-bold fs-5 text-secondary" style={{width: '24px', textAlign: 'center'}}>{index + 1}</div>
+                              <div className="fw-bold fs-6 text-secondary" style={{width: '20px', textAlign: 'center'}}>{index + 1}</div>
                               <img src={comic.coverUrl} alt={comic.title} 
-                                   className="rounded top-comic-img" 
-                                   style={{width: '45px', height: '60px', objectFit: 'cover'}} loading="lazy" decoding="async" />
-                              <div className="flex-grow-1 overflow-hidden">
-                                  <h6 className="mb-1 text-truncate fs-6" style={{fontSize: '0.9rem'}}>{comic.title}</h6>
-                                  <div className="small text-secondary d-flex align-items-center gap-2" style={{fontSize: '0.75rem'}}>
-                                      <span><Star size={12} className="text-warning"/> {comic.ratingScore || 'N/A'}</span>
-                                      <span>Lượt xem: {comic.totalViews || 0}</span>
+                                   className="rounded flex-shrink-0" 
+                                   style={{width: '38px', height: '50px', objectFit: 'cover'}} loading="lazy" decoding="async" />
+                              <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                  <h6 className="mb-0 text-truncate fw-bold" style={{fontSize: '0.85rem'}}>{comic.title}</h6>
+                                  <div className="text-secondary d-flex align-items-center gap-1 text-truncate mt-1" style={{fontSize: '0.7rem'}}>
+                                      <Star size={10} className="text-warning flex-shrink-0"/> {comic.ratingScore || 'N/A'} 
+                                      <span className="ms-1 text-truncate">Lượt xem: {comic.totalViews || 0}</span>
                                   </div>
                               </div>
                           </div>
@@ -333,28 +333,28 @@ const Home = () => {
                               return <div className="text-secondary small text-center p-3">Chưa có bình luận nào.</div>;
                           }
                           return displayComments.map(cmt => (
-                              <div key={cmt.id} className="p-3 mb-2 shadow-sm" style={{background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '16px'}}>
+                              <div key={cmt.id} className="p-3 mb-2 shadow-sm" style={{background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: '12px'}}>
                                   <div className="d-flex align-items-center gap-2 mb-2">
                                       <img src={cmt.user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${cmt.user?.username}`} 
                                            alt="avatar" 
-                                           className="rounded-circle comment-avatar" 
-                                           style={{width: '28px', height: '28px', objectFit: 'cover'}} loading="lazy" decoding="async" />
-                                      <div className="fw-bold text-truncate" style={{fontSize: '0.9rem', color: 'var(--text-primary)'}}>{cmt.user?.username || 'Ẩn danh'}</div>
-                                      <span className="ms-auto" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>
-                                          {new Date(cmt.createdAt).toLocaleDateString()}
+                                           className="rounded-circle flex-shrink-0" 
+                                           style={{width: '24px', height: '24px', objectFit: 'cover'}} loading="lazy" decoding="async" />
+                                      <div className="fw-bold text-truncate flex-grow-1" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>{cmt.user?.username || 'Ẩn danh'}</div>
+                                      <span className="flex-shrink-0" style={{fontSize: '0.65rem', color: 'var(--text-secondary)'}}>
+                                          {new Date(cmt.createdAt).toLocaleDateString('vi-VN')}
                                       </span>
                                   </div>
-                                  <div className="fst-italic ps-1" style={{fontSize: '0.85rem', color: 'var(--text-primary)', opacity: 0.9}}>"{cmt.content}"</div>
+                                  <div className="fst-italic overflow-hidden" style={{fontSize: '0.8rem', color: 'var(--text-primary)', opacity: 0.9, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'}}>"{cmt.content}"</div>
                                   <div className="mt-2 text-end">
                                       <span 
-                                         className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1 cursor-pointer hover-scale" 
-                                         style={{fontSize: '0.7rem'}}
+                                         className="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1 cursor-pointer hover-scale text-truncate d-inline-block" 
+                                         style={{maxWidth: '100%', fontSize: '0.65rem'}}
                                          onClick={() => {
                                              setContentMode(cmt.comic?.isAdult ? 'DEMON' : 'FAMILY');
                                              navigate(`/comic/${cmt.comic?.id}`);
                                          }}
                                       >
-                                          {cmt.comic?.title?.substring(0, 20)}...
+                                          {cmt.comic?.title}
                                       </span>
                                   </div>
                               </div>
