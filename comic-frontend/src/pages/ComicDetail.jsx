@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTheme } from '../configurations/ThemeContext';
 import { Eye, Star, Clock, BookOpen, ChevronRight, Bookmark, BookmarkPlus, Send } from 'lucide-react';
 import { useAuth } from '../configurations/AuthContext';
+import { cachedFetch } from '../services/CacheService';
 
 const ComicDetail = () => {
   const { id } = useParams();
@@ -21,8 +22,8 @@ const ComicDetail = () => {
     
     // Fetch comic details
     Promise.all([
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/comics/${id}`).then(res => res.json()),
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/chapters/comic/${id}`).then(res => res.json())
+      cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/comics/${id}`).then(res => res.json()),
+      cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/chapters/comic/${id}`).then(res => res.json())
     ])
     .then(([comicData, chaptersData]) => {
       setComic(comicData);
@@ -33,7 +34,7 @@ const ComicDetail = () => {
     .catch(err => console.error("Error fetching comic details:", err))
     .finally(() => setLoading(false));
 
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/comments/comic/${id}`)
+    cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/comments/comic/${id}`)
       .then(res => res.json())
       .then(data => {
           if (Array.isArray(data)) {
@@ -43,7 +44,7 @@ const ComicDetail = () => {
       .catch(console.error);
 
     if (user) {
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/bookmarks/user/${user.id}`)
+        cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/bookmarks/user/${user.id}`)
           .then(res => res.json())
           .then(data => {
               if (Array.isArray(data)) {

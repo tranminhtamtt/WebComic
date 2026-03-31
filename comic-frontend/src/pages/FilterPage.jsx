@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTheme } from '../configurations/ThemeContext';
 import { Flame, Star, Search, Filter, MessageCircle, Eye, Clock, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import ComicCard from '../components/ComicCard';
+import { cachedFetch } from '../services/CacheService';
 
 const FilterPage = () => {
   const { contentMode } = useTheme();
@@ -27,7 +28,7 @@ const FilterPage = () => {
 
   useEffect(() => {
     // Fetch configs
-    fetch(import.meta.env.VITE_API_BASE_URL + '/tags')
+    cachedFetch(import.meta.env.VITE_API_BASE_URL + '/tags')
       .then(r => r.json())
       .then(d => {
         if (Array.isArray(d)) setTags(d);
@@ -36,7 +37,7 @@ const FilterPage = () => {
       .catch(e => console.error(e));
 
     // Fetch comics
-    fetch(import.meta.env.VITE_API_BASE_URL + '/comics')
+    cachedFetch(import.meta.env.VITE_API_BASE_URL + '/comics')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setComics(data);

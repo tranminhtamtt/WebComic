@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme, themeColors } from '../configurations/ThemeContext';
 import { Star, TrendingUp, Clock, ArrowRight, Search, MessageCircle, MoreHorizontal } from 'lucide-react';
 import ComicCard from '../components/ComicCard';
+import { cachedFetch } from '../services/CacheService';
 
 const Home = () => {
   const { contentMode, setContentMode, themeColor, theme } = useTheme();
@@ -35,7 +36,7 @@ const Home = () => {
 
 
   useEffect(() => {
-    fetch(import.meta.env.VITE_API_BASE_URL + '/comics')
+    cachedFetch(import.meta.env.VITE_API_BASE_URL + '/comics')
       .then(res => res.json())
       .then(data => {
           if (Array.isArray(data)) setComics(data);
@@ -43,14 +44,14 @@ const Home = () => {
       })
       .catch(err => console.error("Error fetching comics:", err));
 
-    fetch(import.meta.env.VITE_API_BASE_URL + '/comments/recent')
+    cachedFetch(import.meta.env.VITE_API_BASE_URL + '/comments/recent')
       .then(res => res.json())
       .then(data => {
           if (Array.isArray(data)) setRecentComments(data);
       })
       .catch(err => console.error("Error fetching comments:", err));
 
-    fetch(import.meta.env.VITE_API_BASE_URL + '/categories')
+    cachedFetch(import.meta.env.VITE_API_BASE_URL + '/categories')
       .then(res => res.json())
       .then(data => {
           if (Array.isArray(data)) setCategories(data);

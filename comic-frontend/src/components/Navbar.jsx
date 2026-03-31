@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Moon, Sun, Shield, ShieldAlert, Search, User, Bookmark, LogOut, Menu } from 'lucide-react';
 import { useTheme } from '../configurations/ThemeContext';
 import { useAuth } from '../configurations/AuthContext';
+import { cachedFetch } from '../services/CacheService';
 
 const Navbar = () => {
   const { theme, toggleTheme, contentMode, toggleContentMode } = useTheme();
@@ -65,7 +66,7 @@ const Navbar = () => {
       setIsSearching(true);
       setShowSearchDropdown(true);
       const timer = setTimeout(() => {
-        fetch(`${import.meta.env.VITE_API_BASE_URL}/comics/page?keyword=${encodeURIComponent(searchQuery)}&size=7&page=0`)
+        cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/comics/page?keyword=${encodeURIComponent(searchQuery)}&size=7&page=0`)
           .then(res => res.json())
           .then(data => {
             if (data.content) {
@@ -83,7 +84,7 @@ const Navbar = () => {
   }, [searchQuery]);
 
   React.useEffect(() => {
-    fetch(import.meta.env.VITE_API_BASE_URL + '/categories')
+    cachedFetch(import.meta.env.VITE_API_BASE_URL + '/categories')
       .then(r => r.json())
       .then(data => setCategories(data))
       .catch(err => console.error(err));

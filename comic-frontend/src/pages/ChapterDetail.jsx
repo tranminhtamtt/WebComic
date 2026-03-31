@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../configurations/ThemeContext';
 import { ChevronLeft, ChevronRight, Home, List, ArrowUp } from 'lucide-react';
+import { cachedFetch } from '../services/CacheService';
 
 const ChapterDetail = () => {
   const { id, chapterId } = useParams();
@@ -22,10 +23,10 @@ const ChapterDetail = () => {
     setLoading(true);
     
     Promise.all([
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/comics/${id}`).then(res => res.json()),
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/chapters/${chapterId}`).then(res => res.json()),
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/chapter-images/chapter/${chapterId}`).then(res => res.json()),
-      fetch(`${import.meta.env.VITE_API_BASE_URL}/chapters/comic/${id}`).then(res => res.json())
+      cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/comics/${id}`).then(res => res.json()),
+      cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/chapters/${chapterId}`).then(res => res.json()),
+      cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/chapter-images/chapter/${chapterId}`).then(res => res.json()),
+      cachedFetch(`${import.meta.env.VITE_API_BASE_URL}/chapters/comic/${id}`).then(res => res.json())
     ])
     .then(([comicData, chapterData, imagesData, allChaptersData]) => {
       setComic(comicData);
