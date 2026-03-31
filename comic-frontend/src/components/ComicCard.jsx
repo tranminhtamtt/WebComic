@@ -46,7 +46,7 @@ const ComicCard = ({ comic, isHotCarouselItem }) => {
     if (isHotCarouselItem) {
         return (
             <Link to={`/comic/${comic.id}`} className="hot-carousel-card position-relative shadow-sm" draggable="false">
-                <div className="hot-carousel-img-wrapper position-relative" style={{ width: '180px', height: '240px', borderRadius: '8px', overflow: 'hidden' }}>
+                <div className="hot-carousel-img-wrapper position-relative">
                     <img src={comic.coverUrl} style={{width: '100%', height: '100%', objectFit: 'cover'}} alt={comic.title} draggable="false" loading="lazy" decoding="async" />
                     
                     {/* Badges Overlay */}

@@ -15,6 +15,7 @@ const ComicDetail = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isExpandedText, setIsExpandedText] = useState(false);
 
   useEffect(() => {
     // Scroll to top
@@ -141,10 +142,22 @@ const ComicDetail = () => {
 
           <div className="comic-detail-description">
             <h3>Nội Dung:</h3>
-            <p>{comic.description}</p>
+            <p>
+              {comic.description && comic.description.length > 200 && !isExpandedText 
+                ? comic.description.substring(0, 200) + '... ' 
+                : comic.description}
+              {comic.description && comic.description.length > 200 && (
+                <span 
+                  onClick={() => setIsExpandedText(!isExpandedText)}
+                  style={{ color: 'var(--accent)', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  {isExpandedText ? ' (Rút gọn)' : ' Xem thêm'}
+                </span>
+              )}
+            </p>
           </div>
 
-          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             {chapters.length > 0 && (
               <Link to={`/comic/${id}/chapter/${chapters[chapters.length - 1].id}`} className={`btn ${isDemon ? 'btn-demon' : 'btn-primary'}`}>
                 Đọc Từ Đầu

@@ -133,8 +133,8 @@ const Navbar = () => {
           onClick={handleToggleContentMode}
           title={isDemon ? "Trở về chế độ an toàn" : "Chế độ an toàn"}
         >
-          {isDemon ? <ShieldAlert size={16} /> : <Shield size={16} />}
-          {isDemon ? 'Demon Mode' : 'Family Mode'}
+          {isDemon ? <ShieldAlert size={18} /> : <Shield size={18} />}
+          <span className="toggle-btn-text" style={{ marginLeft: '4px' }}>{isDemon ? 'Demon Mode' : 'Family Mode'}</span>
         </button>
       </div>
 
@@ -259,11 +259,11 @@ const Navbar = () => {
             <div className="d-flex align-items-center gap-3">
               
               {user.role === 'ADMIN' && (
-                  <div className="d-flex align-items-center gap-2 me-2">
-                      <button className="btn btn-sm btn-outline-danger fw-bold rounded-pill" onClick={() => { navigate('/admin/dashboard'); setIsNavOpen(false); }}>
+                  <div className="d-none d-md-flex align-items-center gap-2 me-2">
+                      <button className="btn btn-sm btn-outline-danger fw-bold rounded-pill px-2 py-1" onClick={() => { navigate('/admin/dashboard'); setIsNavOpen(false); }}>
                           Crawl
                       </button>
-                      <button className="btn btn-sm btn-outline-info fw-bold rounded-pill" onClick={() => { navigate('/admin/comics'); setIsNavOpen(false); }}>
+                      <button className="btn btn-sm btn-outline-info fw-bold rounded-pill px-2 py-1" onClick={() => { navigate('/admin/comics'); setIsNavOpen(false); }}>
                           Kho
                       </button>
                   </div>
@@ -276,7 +276,7 @@ const Navbar = () => {
                 <button className="icon-btn text-accent" aria-label="User Profile">
                   <img src={user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`}
                     alt="avatar"
-                    className="rounded-circle" style={{ width: '24px', height: '24px', objectFit: 'cover' }} />
+                    className="rounded-circle" style={{ width: '28px', height: '28px', objectFit: 'cover' }} />
                 </button>
                 
                 {showUserMenu && (
@@ -287,7 +287,15 @@ const Navbar = () => {
                   <div className="dropdown-item-custom px-2 py-2 fw-bold border-bottom border-secondary mb-1" style={{color: 'var(--text-primary)'}}>
                     {user.username}
                   </div>
-                  <div className="dropdown-item-custom text-danger px-2 py-1 cursor-pointer d-flex align-items-center gap-2"
+                  
+                  {user.role === 'ADMIN' && (
+                    <div className="d-md-none border-bottom border-secondary mb-1 pb-1">
+                      <div className="dropdown-item-custom text-info px-2 py-1 cursor-pointer" onClick={() => { navigate('/admin/dashboard'); setIsNavOpen(false); }}>🔧 Dashboard</div>
+                      <div className="dropdown-item-custom text-success px-2 py-1 cursor-pointer" onClick={() => { navigate('/admin/comics'); setIsNavOpen(false); }}>📚 Kho Truyện</div>
+                    </div>
+                  )}
+
+                  <div className="dropdown-item-custom text-danger px-2 py-1 cursor-pointer d-flex align-items-center gap-2 mt-1"
                     onClick={() => { logout(); setIsNavOpen(false); }}>
                     <LogOut size={16} /> Đăng xuất
                   </div>
