@@ -146,16 +146,24 @@ public class HentaivnxScraperService {
 
         // === COVER IMAGE ===
         String coverUrl = "";
-        Element metaImg = doc.selectFirst("meta[property=og:image]");
-        if (metaImg != null && metaImg.hasAttr("content")) {
-            coverUrl = metaImg.attr("content");
+        // Ưu tiên 1: Ảnh bìa nằm trong div.col-image img (DOM thực tế của HentaiVNX)
+        Element coverImg = doc.selectFirst("div.col-image img, div.book img, .col-xs-4.col-image img");
+        if (coverImg != null && coverImg.hasAttr("src")) {
+            coverUrl = coverImg.attr("abs:src");
         }
+        // Ưu tiên 2: meta og:image
         if (coverUrl.isEmpty()) {
-            // Tìm ảnh bìa trong khu vực detail
+            Element metaImg = doc.selectFirst("meta[property=og:image]");
+            if (metaImg != null && metaImg.hasAttr("content")) {
+                coverUrl = metaImg.attr("content");
+            }
+        }
+        // Ưu tiên 3: Tìm ảnh có /images/comics/ trong src
+        if (coverUrl.isEmpty()) {
             Elements imgs = doc.select("img[src]");
             for (Element img : imgs) {
-                String src = img.attr("src");
-                if (src.contains("truyen-hentai") || src.contains("cover") || src.contains("thumb")) {
+                String src = img.attr("abs:src");
+                if (src.contains("/images/comics/") || src.contains("cover") || src.contains("thumb")) {
                     coverUrl = src;
                     break;
                 }
@@ -185,11 +193,13 @@ public class HentaivnxScraperService {
 
         // === AUTHOR ===
         String author = "Đang cập nhật";
-        Elements allText = doc.select("li, span, p, div");
+        // Tìm trong các thẻ nhỏ chứa "Tác giả" - chỉ lấy thẻ có ít text (< 200 ký tự)
+        Elements allText = doc.select("li, span, p, td");
         for (Element el : allText) {
-            String text = el.text().toLowerCase();
-            if (text.contains("tác giả") || text.contains("author")) {
-                author = el.text()
+            String text = el.ownText().trim(); // ownText() chỉ lấy text trực tiếp, không lấy text con
+            String fullText = el.text().trim();
+            if (fullText.length() < 200 && (fullText.toLowerCase().contains("tác giả") || fullText.toLowerCase().contains("author"))) {
+                author = fullText
                     .replaceAll("(?i)tác giả\\s*:?\\s*", "")
                     .replaceAll("(?i)author\\s*:?\\s*", "")
                     .trim();
