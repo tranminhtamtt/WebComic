@@ -1320,7 +1320,7 @@ body {
   }
 
   .row>* {
-    @media (max-width: 576px) padding-right: 0.3rem !important;
+    padding-right: 0.3rem !important;
     padding-left: 0.3rem !important;
   }
 
