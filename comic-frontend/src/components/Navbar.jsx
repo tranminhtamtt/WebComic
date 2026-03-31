@@ -183,17 +183,14 @@ const Navbar = () => {
         </div>
 
         <div className="nav-actions">
-          <NavLink to="/bookmarks" onClick={() => setIsNavOpen(false)} className={({ isActive }) => `icon-btn ${isActive ? 'text-accent' : ''}`} aria-label="Bookmarks">
-            <Bookmark size={20} fill="currentColor" className={window.location.pathname === '/bookmarks' ? 'text-warning' : ''} />
-          </NavLink>
-
-          <div className="position-relative d-flex align-items-center rounded-pill px-3 py-1 border transition"
+          {/* Search Bar - Full width on mobile */}
+          <div className="position-relative d-flex align-items-center rounded-pill px-3 py-1 border transition nav-search-bar"
             style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--glass-border)' }}
             ref={searchContainerRef}>
             <Search size={16} style={{ color: 'var(--text-secondary)' }} />
             <input
               type="text"
-              className="bg-transparent border-0 ms-2 shadow-none"
+              className="bg-transparent border-0 ms-2 shadow-none flex-grow-1"
               placeholder="Tìm truyện..."
               style={{ outline: 'none', width: '130px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
               value={searchQuery}
@@ -202,7 +199,7 @@ const Navbar = () => {
               onKeyDown={handleSearch}
             />
 
-            {/* Khung Gợi Ý Dropdown Khoảng Cách Nhỏ */}
+            {/* Khung Gợi Ý Dropdown */}
             {showSearchDropdown && (
               <div className="custom-dropdown shadow-lg rounded p-2"
                 style={{
@@ -251,63 +248,44 @@ const Navbar = () => {
             )}
           </div>
 
-          <button className="icon-btn" onClick={handleToggleTheme} aria-label="Toggle Theme">
-            {theme === 'DARK' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          {/* Action Buttons Row */}
+          <div className="nav-action-row">
+            <NavLink to="/bookmarks" onClick={() => setIsNavOpen(false)} className={({ isActive }) => `nav-action-item ${isActive ? 'text-accent' : ''}`} aria-label="Bookmarks">
+              <Bookmark size={18} fill="currentColor" className={window.location.pathname === '/bookmarks' ? 'text-warning' : ''} />
+              <span>Tủ truyện</span>
+            </NavLink>
 
-          {user ? (
-            <div className="d-flex align-items-center gap-3">
-              
-              {user.role === 'ADMIN' && (
-                  <div className="d-none d-md-flex align-items-center gap-2 me-2">
-                      <button className="btn btn-sm btn-outline-danger fw-bold rounded-pill px-2 py-1" onClick={() => { navigate('/admin/dashboard'); setIsNavOpen(false); }}>
-                          Crawl
-                      </button>
-                      <button className="btn btn-sm btn-outline-info fw-bold rounded-pill px-2 py-1" onClick={() => { navigate('/admin/comics'); setIsNavOpen(false); }}>
-                          Kho
-                      </button>
-                  </div>
-              )}
-
-              <div className="nav-item position-relative"
-                onMouseEnter={() => setShowUserMenu(true)} 
-                onMouseLeave={() => setShowUserMenu(false)}>
-                
-                <button className="icon-btn text-accent" aria-label="User Profile">
-                  <img src={user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`}
-                    alt="avatar"
-                    className="rounded-circle" style={{ width: '28px', height: '28px', objectFit: 'cover' }} />
-                </button>
-                
-                {showUserMenu && (
-                  <div className="custom-dropdown shadow-lg rounded p-2" style={{
-                    position: 'absolute', top: '100%', right: '0', minWidth: '150px', zIndex: 1000,
-                    border: '1px solid var(--glass-border)', backgroundColor: 'var(--bg-secondary)'
-                  }}>
-                  <div className="dropdown-item-custom px-2 py-2 fw-bold border-bottom border-secondary mb-1" style={{color: 'var(--text-primary)'}}>
-                    {user.username}
-                  </div>
-                  
-                  {user.role === 'ADMIN' && (
-                    <div className="d-md-none border-bottom border-secondary mb-1 pb-1">
-                      <div className="dropdown-item-custom text-info px-2 py-1 cursor-pointer" onClick={() => { navigate('/admin/dashboard'); setIsNavOpen(false); }}>🔧 Dashboard</div>
-                      <div className="dropdown-item-custom text-success px-2 py-1 cursor-pointer" onClick={() => { navigate('/admin/comics'); setIsNavOpen(false); }}>📚 Kho Truyện</div>
-                    </div>
-                  )}
-
-                  <div className="dropdown-item-custom text-danger px-2 py-1 cursor-pointer d-flex align-items-center gap-2 mt-1"
-                    onClick={() => { logout(); setIsNavOpen(false); }}>
-                    <LogOut size={16} /> Đăng xuất
-                  </div>
-                </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <button className="icon-btn" aria-label="Login" onClick={() => { setShowAuthModal(true); setIsNavOpen(false); }}>
-              <User size={20} />
+            <button className="nav-action-item" onClick={handleToggleTheme} aria-label="Toggle Theme">
+              {theme === 'DARK' ? <Sun size={18} /> : <Moon size={18} />}
+              <span>{theme === 'DARK' ? 'Sáng' : 'Tối'}</span>
             </button>
-          )}
+
+            {user ? (
+              <>
+                {user.role === 'ADMIN' && (
+                  <>
+                    <button className="nav-action-item text-danger" onClick={() => { navigate('/admin/dashboard'); setIsNavOpen(false); }}>
+                      <Shield size={18} />
+                      <span>Crawl</span>
+                    </button>
+                    <button className="nav-action-item text-info" onClick={() => { navigate('/admin/comics'); setIsNavOpen(false); }}>
+                      <Search size={18} />
+                      <span>Kho</span>
+                    </button>
+                  </>
+                )}
+                <button className="nav-action-item text-danger" onClick={() => { logout(); setIsNavOpen(false); }}>
+                  <LogOut size={18} />
+                  <span>Đăng xuất</span>
+                </button>
+              </>
+            ) : (
+              <button className="nav-action-item nav-login-btn" onClick={() => { setShowAuthModal(true); setIsNavOpen(false); }}>
+                <User size={18} />
+                <span>Đăng nhập</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

@@ -164,3 +164,137 @@
 .animate-fade-in {
     animation: fadeIn 0.4s ease forwards;
 }
+
+/* ==================================================== */
+/* ADMIN MOBILE RESPONSIVE (< 768px)                    */
+/* ==================================================== */
+@media (max-width: 768px) {
+    .admin-custom-container {
+        padding: 1rem 0.5rem;
+        padding-top: calc(var(--nav-height, 70px) + 1rem);
+    }
+
+    .admin-glass-card {
+        border-radius: 12px;
+        padding: 0.75rem !important;
+    }
+
+    .admin-glass-card h3 {
+        font-size: 1rem !important;
+    }
+
+    .admin-glass-card small {
+        font-size: 0.65rem !important;
+    }
+
+    /* Header flex wrap */
+    .admin-glass-card .d-flex.justify-content-between {
+        flex-direction: column !important;
+        gap: 0.75rem;
+        align-items: flex-start !important;
+    }
+
+    /* Source API buttons row - scroll horizontal */
+    .admin-glass-card .btn-group,
+    .admin-glass-card .d-flex.gap-2 {
+        flex-wrap: wrap !important;
+    }
+
+    .admin-glass-card .btn {
+        font-size: 0.75rem !important;
+        padding: 0.35rem 0.6rem !important;
+    }
+
+    /* Comic grid in admin */
+    .admin-comic-card .img-wrapper {
+        padding-top: 120%;
+    }
+
+    /* Tables */
+    .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    table th, table td {
+        font-size: 0.75rem !important;
+        padding: 0.4rem 0.3rem !important;
+        white-space: nowrap;
+    }
+
+    /* Modals */
+    .modal-dialog {
+        margin: 0.5rem !important;
+    }
+
+    .modal-content {
+        border-radius: 12px !important;
+    }
+
+    .modal-body {
+        padding: 0.75rem !important;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    /* Detail panels */
+    .admin-detail-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .admin-chapter-item {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    /* Form controls */
+    .form-control, .form-select {
+        font-size: 0.85rem !important;
+    }
+
+    /* Progress bars */
+    .progress {
+        height: 0.75rem !important;
+    }
+
+    /* Admin btn glow */
+    .admin-btn-glow, .admin-btn-refresh {
+        font-size: 0.8rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+
+    /* Flex row adjustments */
+    .row .col-md-4, .row .col-md-6, .row .col-md-8 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-custom-container {
+        padding: 0.5rem 0.25rem;
+        padding-top: calc(var(--nav-height, 70px) + 0.5rem);
+    }
+
+    .admin-glass-card {
+        border-radius: 8px;
+    }
+
+    .admin-gradient-text {
+        font-size: 0.9rem !important;
+    }
+
+    /* Stack all columns */
+    .row {
+        margin: 0 !important;
+    }
+
+    .row > * {
+        padding: 0.25rem !important;
+    }
+}
