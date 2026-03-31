@@ -166,7 +166,7 @@ const AdminDashboard = () => {
         }
 
         try {
-            const response = await axios.post('${import.meta.env.VITE_API_BASE_URL}/admin/upload-cover', formData, {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/upload-cover`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             if (response.data && response.data.url) {
@@ -262,7 +262,7 @@ const AdminDashboard = () => {
             setProgress({ state: 'Đang truyền dẫn dữ liệu lên Máy Chủ Cốt Lõi...', percent: 80 });
 
             // Send to backend
-            const response = await axios.post('${import.meta.env.VITE_API_BASE_URL}/admin/import-comic', importPayload);
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/import-comic`, importPayload);
             
             if (response.data.success) {
                 setProgress({ state: `Đồng bộ hoàn tất! ID: ${response.data.comicId}`, percent: 100 });
