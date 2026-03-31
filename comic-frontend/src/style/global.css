@@ -116,9 +116,7 @@ a {
   left: 0;
   right: 0;
   height: var(--nav-height);
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-secondary);
   border-bottom: 1px solid var(--glass-border);
   display: flex;
   align-items: center;

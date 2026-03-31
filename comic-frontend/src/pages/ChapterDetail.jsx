@@ -99,10 +99,11 @@ const ChapterDetail = () => {
         <div className="top-bar-right">
           {/* Nút Tắt/Bật Lazy Load */}
           <button 
-            className="top-bar-btn d-none d-md-block" 
+            className="top-bar-btn d-none d-md-flex" 
             onClick={() => setLazyLoad(!lazyLoad)}
             title={lazyLoad ? "Đang bật Tải từng phần (Lazy). Bấm để Tải tất cả ảnh cùng lúc" : "Đang tải cả Chapter. Bấm để bật lại Tải chậm"}
             style={{ 
+              width: 'auto',
               marginRight: '12px', 
               fontSize: '0.8rem', 
               padding: '4px 10px', 
