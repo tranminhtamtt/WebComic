@@ -371,10 +371,11 @@ const AdminDashboard = () => {
                         </div>
                         
                         {/* Bộ lọc Dữ Liệu */}
-                        <div className="d-flex flex-wrap gap-2 mb-3">
-                            <button className={`btn btn-sm px-3 rounded-pill fw-bold ${fetchType === 'latest' ? 'btn-primary' : 'btn-outline-secondary opacity-75'}`} style={{color: fetchType !== 'latest' ? 'var(--text-primary)' : ''}} onClick={() => setFetchType('latest')}>🕒 Mới Cập Nhật</button>
-                            <button className={`btn btn-sm px-3 rounded-pill fw-bold ${fetchType === 'hot' ? 'btn-danger' : 'btn-outline-secondary opacity-75'}`} style={{color: fetchType !== 'hot' ? 'var(--text-primary)' : ''}} onClick={() => setFetchType('hot')}>🔥 Đang Ra / Nổi Bật</button>
-                            <button className={`btn btn-sm px-3 rounded-pill fw-bold ${fetchType === 'completed' ? 'btn-success' : 'btn-outline-secondary opacity-75'}`} style={{color: fetchType !== 'completed' ? 'var(--text-primary)' : ''}} onClick={() => setFetchType('completed')}>✅ Khép Kín (Hoàn Thành)</button>
+                        <div className="d-flex flex-wrap align-items-center gap-2 mb-3" style={{ opacity: searchQuery.trim() ? 0.4 : 1, pointerEvents: searchQuery.trim() ? 'none' : 'auto', transition: 'all 0.3s ease' }}>
+                            <button className={`btn btn-sm px-3 rounded-pill fw-bold ${!searchQuery.trim() && fetchType === 'latest' ? 'btn-primary' : 'btn-outline-secondary opacity-75'}`} style={{color: !searchQuery.trim() && fetchType === 'latest' ? '' : 'var(--text-primary)'}} onClick={() => setFetchType('latest')}>🕒 Mới Cập Nhật</button>
+                            <button className={`btn btn-sm px-3 rounded-pill fw-bold ${!searchQuery.trim() && fetchType === 'hot' ? 'btn-danger' : 'btn-outline-secondary opacity-75'}`} style={{color: !searchQuery.trim() && fetchType === 'hot' ? '' : 'var(--text-primary)'}} onClick={() => setFetchType('hot')}>🔥 Đang Ra / Nổi Bật</button>
+                            <button className={`btn btn-sm px-3 rounded-pill fw-bold ${!searchQuery.trim() && fetchType === 'completed' ? 'btn-success' : 'btn-outline-secondary opacity-75'}`} style={{color: !searchQuery.trim() && fetchType === 'completed' ? '' : 'var(--text-primary)'}} onClick={() => setFetchType('completed')}>✅ Khép Kín (Hoàn Thành)</button>
+                            {searchQuery.trim() && <span className="text-warning small ms-2 fw-semibold animate-fade-in text-nowrap">⚠️ Đã vô hiệu hóa do đang Tìm kiếm</span>}
                         </div>
 
                         {/* Thanh Tìm Kiếm */}
