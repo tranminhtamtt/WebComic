@@ -47,7 +47,7 @@ const ComicCard = ({ comic, isHotCarouselItem }) => {
         return (
             <Link to={`/comic/${comic.id}`} className="hot-carousel-card position-relative shadow-sm" draggable="false">
                 <div className="hot-carousel-img-wrapper position-relative" style={{ width: '180px', height: '240px', borderRadius: '8px', overflow: 'hidden' }}>
-                    <img src={comic.coverUrl} style={{width: '100%', height: '100%', objectFit: 'cover'}} alt={comic.title} draggable="false" />
+                    <img src={comic.coverUrl} style={{width: '100%', height: '100%', objectFit: 'cover'}} alt={comic.title} draggable="false" loading="lazy" decoding="async" />
                     
                     {/* Badges Overlay */}
                     <div className="position-absolute top-0 start-0 w-100 p-2 d-flex justify-content-between align-items-start pointer-event-none">
@@ -82,7 +82,7 @@ const ComicCard = ({ comic, isHotCarouselItem }) => {
     return (
         <Link to={`/comic/${comic.id}`} className="comic-card position-relative" draggable="false">
             <div className="comic-cover-container position-relative">
-                <img className="comic-cover" src={comic.coverUrl} alt={comic.title} draggable="false" />
+                <img className="comic-cover" src={comic.coverUrl} alt={comic.title} draggable="false" loading="lazy" decoding="async" />
                 {/* Badges Overlay cho các truyện thường */}
                 <div className="position-absolute top-0 start-0 w-100 p-2 d-flex justify-content-between align-items-start pointer-event-none">
                     <div className="d-flex gap-1 align-items-center pointer-event-none">

@@ -113,7 +113,7 @@ const ComicDetail = () => {
       <div className="comic-detail-container">
         {/* Left: Cover */}
         <div className="comic-detail-cover">
-          <img src={comic.coverUrl} alt={comic.title} />
+          <img src={comic.coverUrl} alt={comic.title} loading="lazy" decoding="async" />
         </div>
 
         {/* Right: Info */}
@@ -193,7 +193,7 @@ const ComicDetail = () => {
         {user ? (
           <form className="mb-4 d-flex gap-2" onSubmit={handlePostComment}>
             <img src={user.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}`} 
-                 alt="avatar" className="rounded-circle" style={{width: '40px', height: '40px', objectFit: 'cover'}} />
+                 alt="avatar" className="rounded-circle" style={{width: '40px', height: '40px', objectFit: 'cover'}} loading="lazy" decoding="async" />
             <div className="flex-grow-1 position-relative">
                <input 
                   type="text" 
@@ -219,7 +219,7 @@ const ComicDetail = () => {
           {comments.map(cmt => (
             <div key={cmt.id} className="d-flex gap-3 bg-dark p-3 rounded border border-secondary border-opacity-25">
                <img src={cmt.user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${cmt.user?.username}`} 
-                    alt="avatar" className="rounded-circle mt-1" style={{width: '36px', height: '36px', objectFit: 'cover'}} />
+                    alt="avatar" className="rounded-circle mt-1" style={{width: '36px', height: '36px', objectFit: 'cover'}} loading="lazy" decoding="async" />
                <div>
                   <div className="fw-bold mb-1" style={{fontSize: '0.9rem'}}>
                     {cmt.user?.username || 'Ẩn danh'} 

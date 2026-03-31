@@ -191,6 +191,7 @@ const Home = () => {
                 className="anime-character-popover" 
                 style={{ width: '250px', objectFit: 'contain' }}
                 onError={(e) => { e.target.style.display = 'none'; }}
+                loading="lazy" decoding="async"
             />
             <button 
                 className="anime-dynamic-btn"
@@ -307,7 +308,7 @@ const Home = () => {
                               <div className="fw-bold fs-5 text-secondary" style={{width: '24px', textAlign: 'center'}}>{index + 1}</div>
                               <img src={comic.coverUrl} alt={comic.title} 
                                    className="rounded top-comic-img" 
-                                   style={{width: '45px', height: '60px', objectFit: 'cover'}} />
+                                   style={{width: '45px', height: '60px', objectFit: 'cover'}} loading="lazy" decoding="async" />
                               <div className="flex-grow-1 overflow-hidden">
                                   <h6 className="mb-1 text-truncate fs-6" style={{fontSize: '0.9rem'}}>{comic.title}</h6>
                                   <div className="small text-secondary d-flex align-items-center gap-2" style={{fontSize: '0.75rem'}}>
@@ -335,7 +336,7 @@ const Home = () => {
                                       <img src={cmt.user?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${cmt.user?.username}`} 
                                            alt="avatar" 
                                            className="rounded-circle comment-avatar" 
-                                           style={{width: '28px', height: '28px', objectFit: 'cover'}} />
+                                           style={{width: '28px', height: '28px', objectFit: 'cover'}} loading="lazy" decoding="async" />
                                       <div className="fw-bold text-truncate" style={{fontSize: '0.9rem', color: 'var(--text-primary)'}}>{cmt.user?.username || 'Ẩn danh'}</div>
                                       <span className="ms-auto" style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>
                                           {new Date(cmt.createdAt).toLocaleDateString()}

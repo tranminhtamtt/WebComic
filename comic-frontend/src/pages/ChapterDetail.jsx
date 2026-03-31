@@ -143,7 +143,7 @@ const ChapterDetail = () => {
               src={img.imageUrl} 
               alt={`Page ${img.pageNumber}`} 
               className="comic-page-img" 
-              loading="lazy" 
+              loading="lazy" decoding="async"
             />
           ))
         )}

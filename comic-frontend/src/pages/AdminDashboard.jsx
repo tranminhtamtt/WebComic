@@ -397,6 +397,7 @@ const AdminDashboard = () => {
                                                 <img 
                                                     src={comic.coverUrl} 
                                                     alt={comic.title} 
+                                                    loading="lazy" decoding="async"
                                                     onError={(e) => { e.target.src = comic.coverUrl }} // Fallback
                                                 />
                                                 <div className="position-absolute bottom-0 start-0 w-100 p-2" style={{background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)'}}>
@@ -456,6 +457,7 @@ const AdminDashboard = () => {
                                             src={selectedComic.coverUrl} 
                                             alt={selectedComic.title} 
                                             className="img-fluid"
+                                            loading="lazy" decoding="async"
                                             onError={(e) => { e.target.src = selectedComic.coverUrl }}
                                         />
                                         <div className="position-absolute top-0 start-0 w-100 h-100 shadow-inner" style={{boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'}}></div>

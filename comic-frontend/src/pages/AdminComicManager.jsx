@@ -286,6 +286,7 @@ const AdminComicManager = () => {
                                             <img src={comic.coverUrl} alt={comic.title} 
                                                  className="rounded shadow-sm" 
                                                  style={{ width: '45px', height: '60px', objectFit: 'cover' }} 
+                                                 loading="lazy" decoding="async"
                                                  onError={(e) => {e.target.src = 'https://placehold.co/150x200?text=No+Cover'}}/>
                                         </td>
                                         <td>
@@ -372,7 +373,7 @@ const AdminComicManager = () => {
                                     <div className="col-md-4 text-center">
                                         <h6 className="text-secondary mb-3">Thực Tế Ảnh Bìa</h6>
                                         <div className="rounded-3 p-1 mx-auto" style={{ width: '180px', height: '250px', backgroundColor: 'var(--glass-border)' }}>
-                                            <img src={editingComic.coverUrl} alt="Cover Preview" className="w-100 h-100 object-cover rounded" onError={(e) => {e.target.src = 'https://placehold.co/150x200?text=Error'}}/>
+                                            <img src={editingComic.coverUrl} alt="Cover Preview" className="w-100 h-100 object-cover rounded" loading="lazy" decoding="async" onError={(e) => {e.target.src = 'https://placehold.co/150x200?text=Error'}}/>
                                         </div>
                                         <div className="mt-4 text-start p-3 rounded-3 border border-warning border-opacity-25" style={{backgroundColor: 'var(--bg-secondary)'}}>
                                             <div className="d-flex align-items-center gap-2 mb-2">
