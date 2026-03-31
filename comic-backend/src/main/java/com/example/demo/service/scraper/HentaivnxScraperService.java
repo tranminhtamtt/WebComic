@@ -63,7 +63,19 @@ public class HentaivnxScraperService {
                         String fullUrl = BASE_URL + path + page;
                         Document doc = Jsoup.connect(fullUrl)
                                 .userAgent(USER_AGENT)
-                                .timeout(15000)
+                                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+                                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                                .header("Cache-Control", "no-cache")
+                                .header("Connection", "keep-alive")
+                                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
+                                .header("Sec-Ch-Ua-Mobile", "?0")
+                                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                                .header("Sec-Fetch-Dest", "document")
+                                .header("Sec-Fetch-Mode", "navigate")
+                                .header("Sec-Fetch-Site", "none")
+                                .header("Sec-Fetch-User", "?1")
+                                .header("Upgrade-Insecure-Requests", "1")
+                                .timeout(20000)
                                 .get();
 
                         List<Map<String, String>> pageComics = parseComicCards(doc, seenUrls);
@@ -133,7 +145,19 @@ public class HentaivnxScraperService {
     public Map<String, Object> getComicDetail(String url) throws IOException {
         Document doc = Jsoup.connect(url)
                 .userAgent(USER_AGENT)
-                .timeout(15000)
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                .header("Cache-Control", "no-cache")
+                .header("Connection", "keep-alive")
+                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
+                .header("Sec-Ch-Ua-Mobile", "?0")
+                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                .header("Sec-Fetch-Dest", "document")
+                .header("Sec-Fetch-Mode", "navigate")
+                .header("Sec-Fetch-Site", "none")
+                .header("Sec-Fetch-User", "?1")
+                .header("Upgrade-Insecure-Requests", "1")
+                .timeout(20000)
                 .get();
 
         Map<String, Object> detail = new HashMap<>();
@@ -288,7 +312,19 @@ public class HentaivnxScraperService {
     public List<String> getChapterImages(String chapterUrl) throws IOException {
         Document doc = Jsoup.connect(chapterUrl)
                 .userAgent(USER_AGENT)
-                .timeout(15000)
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+                .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                .header("Cache-Control", "no-cache")
+                .header("Connection", "keep-alive")
+                .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
+                .header("Sec-Ch-Ua-Mobile", "?0")
+                .header("Sec-Ch-Ua-Platform", "\"Windows\"")
+                .header("Sec-Fetch-Dest", "document")
+                .header("Sec-Fetch-Mode", "navigate")
+                .header("Sec-Fetch-Site", "none")
+                .header("Sec-Fetch-User", "?1")
+                .header("Upgrade-Insecure-Requests", "1")
+                .timeout(20000)
                 .get();
 
         List<String> images = new ArrayList<>();
