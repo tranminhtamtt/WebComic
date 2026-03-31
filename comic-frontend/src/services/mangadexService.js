@@ -22,13 +22,9 @@ export const scrapeComicList = async (type = 'latest') => {
     try {
         // Lấy danh sách manga mới cập nhật (có ảnh bìa) với ngôn ngữ gốc tiếng Nhật/Hàn/Trung, đã đc dịch sang Eng.
         // Nhưng đơn giản nhất là lấy list manga ngẫu nhiên hoặc mới nhất hỗ trợ tiếng Anh
-        let order = 'order[updatedAt]=desc';
-        if (type === 'hot') {
-            order = 'order[followedCount]=desc';
-        } else if (type === 'completed') {
-            order = 'order[updatedAt]=desc&status[]=completed';
-        }
-        const response = await fetch(`${BASE_URL}/manga?includes[]=cover_art&availableTranslatedLanguage[]=en&${order}&limit=30`);
+        const order = type === 'hot' ? 'order[followedCount]=desc' : (type === 'completed' ? 'order[updatedAt]=desc&status[]=completed' : 'order[updatedAt]=desc');
+        const targetUrl = `${BASE_URL}/manga?includes[]=cover_art&availableTranslatedLanguage[]=en&${order}&limit=30`;
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/proxy?url=${encodeURIComponent(targetUrl)}`);
         if (!response.ok) throw new Error(`MangaDex API error: ${response.status}`);
         const json = await response.json();
         
@@ -57,7 +53,8 @@ export const scrapeComicList = async (type = 'latest') => {
  */
 export const searchComic = async (keyword) => {
     try {
-        const response = await fetch(`${BASE_URL}/manga?title=${encodeURIComponent(keyword)}&includes[]=cover_art&availableTranslatedLanguage[]=en&limit=30`);
+        const targetUrl = `${BASE_URL}/manga?title=${encodeURIComponent(keyword)}&includes[]=cover_art&availableTranslatedLanguage[]=en&limit=30`;
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/proxy?url=${encodeURIComponent(targetUrl)}`);
         if (!response.ok) throw new Error(`MangaDex API error: ${response.status}`);
         const json = await response.json();
         
@@ -87,7 +84,8 @@ export const searchComic = async (keyword) => {
 export const scrapeComicDetail = async (mangaId) => {
     try {
         // 1. Lấy Full thông tin truyện (Author, Cover)
-        const mangaRes = await fetch(`${BASE_URL}/manga/${mangaId}?includes[]=cover_art&includes[]=author`);
+        const targetUrlDetail = `${BASE_URL}/manga/${mangaId}?includes[]=cover_art&includes[]=author`;
+        const mangaRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/proxy?url=${encodeURIComponent(targetUrlDetail)}`);
         if (!mangaRes.ok) throw new Error(`MangaDex API error: ${mangaRes.status}`);
         const mangaJson = await mangaRes.json();
         const mangaData = mangaJson.data;
@@ -101,7 +99,8 @@ export const scrapeComicDetail = async (mangaId) => {
 
         // 2. Lấy danh sách Chapters (Chỉ lấy bản tiếng Anh)
         // Giới hạn 500 do API MangaDex phân trang, với truyện cực lớn thì gọi nhiều trang (ở đây ta demo 1 trang đầu hoặc max 500)
-        const chapterRes = await fetch(`${BASE_URL}/manga/${mangaId}/feed?translatedLanguage[]=en&order[chapter]=asc&limit=500`);
+        const targetUrlFeed = `${BASE_URL}/manga/${mangaId}/feed?translatedLanguage[]=en&order[chapter]=asc&limit=500`;
+        const chapterRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/proxy?url=${encodeURIComponent(targetUrlFeed)}`);
         if (!chapterRes.ok) throw new Error(`MangaDex API error: ${chapterRes.status}`);
         const chapterJson = await chapterRes.json();
 
@@ -144,7 +143,8 @@ export const scrapeComicDetail = async (mangaId) => {
  */
 export const scrapeChapterImages = async (chapterId) => {
     try {
-        const response = await fetch(`${BASE_URL}/at-home/server/${chapterId}`);
+        const targetUrlNode = `${BASE_URL}/at-home/server/${chapterId}`;
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/proxy?url=${encodeURIComponent(targetUrlNode)}`);
         if (!response.ok) throw new Error(`MangaDex API error: ${response.status}`);
         const json = await response.json();
         
