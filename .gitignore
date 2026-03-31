@@ -1,0 +1,15 @@
+node_modules/
+dist/
+target/
+.env
+.idea/
+.vscode/
+
+# Ignore frontend build files
+comic-frontend/dist/
+comic-frontend/node_modules/
+comic-frontend/.env
+
+# Ignore backend build files
+comic-backend/target/
+comic-backend/.mvn/
