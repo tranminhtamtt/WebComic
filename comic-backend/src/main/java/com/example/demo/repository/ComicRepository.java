@@ -26,6 +26,10 @@ public interface ComicRepository extends JpaRepository<Comic, Long> {
     @Query("SELECT c FROM Comic c WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%'))")
     Page<Comic> findByTitleContainingIgnoreCaseWithGraph(String title, Pageable pageable);
 
+    @Override
+    @EntityGraph(attributePaths = {"categories", "tags"})
+    Optional<Comic> findById(Long id);
+
     @EntityGraph(attributePaths = {"categories", "tags"})
     Optional<Comic> findBySlug(String slug);
 
