@@ -199,7 +199,9 @@ const AdminDashboard = () => {
         }
     };
 
-    // Khi admin click "Import vào DB"
+    // Khi admin click "Import vào DB" — Tự động chia batch 20 chap/request
+    const BATCH_SIZE = 20;
+
     const handleImportToDB = async () => {
         if (!selectedComic || !selectedComic.detail) return;
         
@@ -229,66 +231,103 @@ const AdminDashboard = () => {
                 return;
             }
 
-            setProgress({ state: 'Đang tải danh sách tài nguyên chương...', percent: 5 });
-
-            // Prepare payload
-            const importPayload = {
-                title: detail.title,
-                coverUrl: detail.coverUrl,
-                description: detail.description,
-                author: detail.author,
-                isAdult: isAdult,
-                categoryIds: selectedCategoryIds,
-                tagIds: selectedTagIds,
-                chapters: []
-            };
-
-            let currentCh = 0;
-            for (let ch of targetChapters) {
-                currentCh++;
-                setProgress({ state: `Đang xử lý ảnh chương ${ch.chapterNumber} (${currentCh}/${totalChapters})...`, percent: Math.round((currentCh/totalChapters)*50) + 5 });
-                
-                const originalIdx = detail.chapters.indexOf(ch);
-                const finalChapterNumber = customChapterNumbers[originalIdx] !== undefined ? customChapterNumbers[originalIdx] : ch.chapterNumber;
-                
-                let imageUrls;
-                if (sourceAPI === 'otruyen') imageUrls = await scrapeChapterImages(ch.url);
-                else if (sourceAPI === 'mangadex') imageUrls = await mangaDexAPI.scrapeChapterImages(ch.url);
-                else if (sourceAPI === 'damconuong') imageUrls = await damconuongAPI.scrapeChapterImages(ch.url);
-                else if (sourceAPI === 'hentaivnx') imageUrls = await hentaivnxAPI.scrapeChapterImages(ch.url);
-                else if (sourceAPI === 'sayhentai') imageUrls = await sayhentaiAPI.scrapeChapterImages(ch.url);
-                
-                importPayload.chapters.push({
-                    chapterNumber: finalChapterNumber,
-                    title: ch.title,
-                    imageUrls: imageUrls
-                });
+            // Chia chapters thành các batch nhỏ (mỗi batch 20 chap)
+            const batches = [];
+            for (let i = 0; i < targetChapters.length; i += BATCH_SIZE) {
+                batches.push(targetChapters.slice(i, i + BATCH_SIZE));
             }
-            
+
+            const totalBatches = batches.length;
+            let lastComicId = null;
+            let totalAdded = 0;
+            let totalSkipped = 0;
+
+            // Tạo description ghi chú
+            let descNote = '';
             if (importMode === 'manual') {
-                importPayload.description += `\n[GHI CHÚ: Admin đã import thủ công ${totalChapters} chapter tuyển chọn.]`;
+                descNote = `\n[GHI CHÚ: Admin đã import thủ công ${totalChapters} chapter tuyển chọn.]`;
             } else if (importMode !== '0' && importMode !== 'custom') {
-                importPayload.description += `\n[GHI CHÚ: Chỉ import ${totalChapters} chapter demo do cài đặt hệ thống Admin]`;
+                descNote = `\n[GHI CHÚ: Chỉ import ${totalChapters} chapter demo do cài đặt hệ thống Admin]`;
             } else if (importMode === 'custom') {
-                importPayload.description += `\n[GHI CHÚ: Đã cấu hình Admin import từ chương ${customRange.start} đến ${customRange.end}]`;
+                descNote = `\n[GHI CHÚ: Đã cấu hình Admin import từ chương ${customRange.start} đến ${customRange.end}]`;
             }
 
-            setProgress({ state: 'Đang truyền dẫn dữ liệu lên Máy Chủ Cốt Lõi...', percent: 80 });
+            // Xử lý từng batch tuần tự
+            for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
+                const batch = batches[batchIdx];
+                const batchStart = batchIdx * BATCH_SIZE + 1;
+                const batchEnd = Math.min(batchStart + batch.length - 1, totalChapters);
 
-            // Send to backend
-            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/import-comic`, importPayload);
-            
-            if (response.data.success) {
-                setProgress({ state: `Đồng bộ hoàn tất! ID: ${response.data.comicId}`, percent: 100 });
-                setTimeout(() => {
-                    setSelectedComic(null);
-                    setProgress({ state: '', percent: 0 });
-                    alert("Import dữ liệu thành công vũ trụ truyện: " + detail.title);
-                }, 1000);
-            } else {
-                setErrorMsg('Import thất bại: ' + response.data.message);
-                setProgress({ state: 'Lỗi đồng bộ', percent: 0 });
+                setProgress({ 
+                    state: `📦 Đợt ${batchIdx + 1}/${totalBatches} — Đang scrape ảnh chương ${batchStart}-${batchEnd}...`, 
+                    percent: Math.round((batchIdx / totalBatches) * 80) + 5 
+                });
+
+                // Scrape ảnh cho batch hiện tại
+                const batchChapters = [];
+                for (let i = 0; i < batch.length; i++) {
+                    const ch = batch[i];
+                    const globalIdx = batchIdx * BATCH_SIZE + i + 1;
+
+                    setProgress({ 
+                        state: `📦 Đợt ${batchIdx + 1}/${totalBatches} — Scrape chương ${ch.chapterNumber} (${globalIdx}/${totalChapters})...`, 
+                        percent: Math.round(((batchIdx + (i / batch.length)) / totalBatches) * 80) + 5 
+                    });
+
+                    const originalIdx = detail.chapters.indexOf(ch);
+                    const finalChapterNumber = customChapterNumbers[originalIdx] !== undefined ? customChapterNumbers[originalIdx] : ch.chapterNumber;
+                    
+                    let imageUrls;
+                    if (sourceAPI === 'otruyen') imageUrls = await scrapeChapterImages(ch.url);
+                    else if (sourceAPI === 'mangadex') imageUrls = await mangaDexAPI.scrapeChapterImages(ch.url);
+                    else if (sourceAPI === 'damconuong') imageUrls = await damconuongAPI.scrapeChapterImages(ch.url);
+                    else if (sourceAPI === 'hentaivnx') imageUrls = await hentaivnxAPI.scrapeChapterImages(ch.url);
+                    else if (sourceAPI === 'sayhentai') imageUrls = await sayhentaiAPI.scrapeChapterImages(ch.url);
+                    
+                    batchChapters.push({
+                        chapterNumber: finalChapterNumber,
+                        title: ch.title,
+                        imageUrls: imageUrls
+                    });
+                }
+
+                // Gửi batch lên backend
+                setProgress({ 
+                    state: `🚀 Đợt ${batchIdx + 1}/${totalBatches} — Đang đẩy ${batch.length} chương lên Server...`, 
+                    percent: Math.round(((batchIdx + 0.9) / totalBatches) * 80) + 5  
+                });
+
+                const importPayload = {
+                    title: detail.title,
+                    coverUrl: detail.coverUrl,
+                    description: detail.description + (batchIdx === 0 ? descNote : ''),
+                    author: detail.author,
+                    isAdult: isAdult,
+                    categoryIds: selectedCategoryIds,
+                    tagIds: selectedTagIds,
+                    chapters: batchChapters
+                };
+
+                const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/import-comic`, importPayload);
+                
+                if (response.data.success) {
+                    lastComicId = response.data.comicId;
+                    // Parse thông tin added/skipped từ message nếu có
+                    totalAdded += batch.length;
+                } else {
+                    setErrorMsg(`Đợt ${batchIdx + 1} thất bại: ${response.data.message}`);
+                    setProgress({ state: `Lỗi ở đợt ${batchIdx + 1}/${totalBatches}`, percent: 0 });
+                    return; // Dừng lại khi batch lỗi
+                }
             }
+
+            // Hoàn tất tất cả batch
+            setProgress({ state: `✅ Đồng bộ hoàn tất! ${totalBatches} đợt — ${totalAdded} chương — ID: ${lastComicId}`, percent: 100 });
+            setTimeout(() => {
+                setSelectedComic(null);
+                setProgress({ state: '', percent: 0 });
+                alert(`Import thành công: ${detail.title}\n\n📦 ${totalBatches} đợt × ${BATCH_SIZE} chap/đợt\n📊 Tổng: ${totalAdded} chương đã import`);
+            }, 1500);
 
         } catch (error) {
             const serverMsg = error.response?.data?.message || error.message;
