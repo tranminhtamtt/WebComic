@@ -4,7 +4,7 @@
  */
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
-const PROXY_DOMAINS = ['2tcdn', 'hentaivnx', 'sayhentai', 'pubtranxzyzz'];
+const PROXY_DOMAINS = ['2tcdn', 'sayhentai', 'pubtranxzyzz'];
 
 export function proxyImageUrl(url) {
     if (!url) return url;
