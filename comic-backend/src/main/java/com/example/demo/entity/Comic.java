@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -69,6 +70,7 @@ public class Comic {
         joinColumns = @JoinColumn(name = "comic_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Set<Category> categories;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -77,5 +79,6 @@ public class Comic {
         joinColumns = @JoinColumn(name = "comic_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Set<Tag> tags;
 }

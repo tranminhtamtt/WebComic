@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Chapter {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comic_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "categories", "tags", "description"})
     private Comic comic;
 
     @Column(name = "chapter_number", nullable = false)

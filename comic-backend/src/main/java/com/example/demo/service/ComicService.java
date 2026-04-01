@@ -23,21 +23,25 @@ public class ComicService {
     private final NotificationRepository notificationRepository;
     private final ReadingHistoryRepository readingHistoryRepository;
 
+    @Transactional(readOnly = true)
     public List<Comic> findAll() {
         return comicRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Page<Comic> findComicsPaged(String keyword, Pageable pageable) {
         if (keyword != null && !keyword.trim().isEmpty()) {
-            return comicRepository.findByTitleContainingIgnoreCase(keyword.trim(), pageable);
+            return comicRepository.findByTitleContainingIgnoreCaseWithGraph(keyword.trim(), pageable);
         }
-        return comicRepository.findAll(pageable);
+        return comicRepository.findAllWithGraph(pageable);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Comic> findById(Long id) {
         return comicRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Comic> findBySlug(String slug) {
         return comicRepository.findBySlug(slug);
     }
