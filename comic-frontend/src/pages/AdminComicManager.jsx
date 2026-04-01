@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Trash2, Edit, Search, ChevronLeft, ChevronRight, AlertTriangle, Save, X, BookOpen, ListOrdered, GripVertical } from 'lucide-react';
+import { LogOut, Trash2, Edit, Search, ChevronLeft, ChevronRight, AlertTriangle, Save, X, BookOpen, ListOrdered, GripVertical, DownloadCloud } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import '../style/admin.css';
 
@@ -23,6 +23,9 @@ const AdminComicManager = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingComic, setEditingComic] = useState(null);
     const [saving, setSaving] = useState(false);
+    
+    // Cloudinary Custom Cover State for Edit Modal
+    const [uploadingCover, setUploadingCover] = useState(false);
     
     // Delete Confirm State
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -126,6 +129,33 @@ const AdminComicManager = () => {
             alert('Lỗi cập nhật truyện: ' + (error.response?.data?.message || error.message));
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleUploadCover = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        setUploadingCover(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/admin/upload-cover`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (response.data && response.data.url) {
+                setEditingComic(prev => ({
+                    ...prev,
+                    coverUrl: response.data.url
+                }));
+                alert('Tải ảnh bìa tuỳ chỉnh lên Cloudinary thành công!');
+            }
+        } catch (error) {
+            alert('Lỗi tải ảnh Cloudinary: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setUploadingCover(false);
+            e.target.value = ''; // reset file input
         }
     };
 
@@ -404,10 +434,25 @@ const AdminComicManager = () => {
                                                 name="author" value={editingComic.author || ''} onChange={handleEditChange} />
                                         </div>
                                         <div className="mb-3">
-                                            <label className="form-label text-secondary text-sm">URL Ảnh Bìa</label>
-                                            <input type="text" className="form-control border-secondary" 
-                                                style={{backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)'}}
-                                                name="coverUrl" value={editingComic.coverUrl || ''} onChange={handleEditChange} />
+                                            <div className="d-flex justify-content-between align-items-center mb-1">
+                                                <label className="form-label text-secondary text-sm m-0">URL Ảnh Bìa</label>
+                                                {uploadingCover && <span className="spinner-border spinner-border-sm text-info"></span>}
+                                            </div>
+                                            <div className="d-flex flex-column gap-2 border border-secondary border-opacity-25 rounded p-2" style={{backgroundColor: 'var(--bg-secondary)'}}>
+                                                <input type="text" className="form-control form-control-sm border-secondary" 
+                                                    style={{backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)'}}
+                                                    name="coverUrl" value={editingComic.coverUrl || ''} onChange={handleEditChange} 
+                                                    placeholder="Dán link ảnh bìa mới vào đây..." />
+                                                <div className="text-secondary text-center small fw-bold" style={{fontSize: '0.75rem'}}>HOẶC TẢI LÊN FILE</div>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    className="form-control form-control-sm border-secondary" 
+                                                    style={{backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)'}}
+                                                    onChange={handleUploadCover}
+                                                    disabled={uploadingCover}
+                                                />
+                                            </div>
                                         </div>
                                         <div className="mb-3">
                                             <label className="form-label text-secondary text-sm">Trạng Thái</label>

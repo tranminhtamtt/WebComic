@@ -10,7 +10,7 @@ export function proxyImageUrl(url) {
     if (!url) return url;
     const needsProxy = PROXY_DOMAINS.some(domain => url.includes(domain));
     if (needsProxy) {
-        return `${API_BASE}/image-proxy?url=${encodeURIComponent(url)}`;
+        return `${API_BASE}/proxy/image?url=${encodeURIComponent(url)}`;
     }
     return url;
 }

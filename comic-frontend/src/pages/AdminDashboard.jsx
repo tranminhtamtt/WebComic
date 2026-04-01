@@ -40,6 +40,11 @@ const AdminDashboard = () => {
     const [detailLoading, setDetailLoading] = useState(false);
     const [progress, setProgress] = useState({ state: '', percent: 0 }); // trạng thái đang parse/import
     const [errorMsg, setErrorMsg] = useState('');
+    
+    // Custom edit states for preview
+    const [editedAuthor, setEditedAuthor] = useState('');
+    const [editedDescription, setEditedDescription] = useState('');
+    const [customChapterTitles, setCustomChapterTitles] = useState({});
 
     useEffect(() => {
         // Auth check
@@ -130,6 +135,9 @@ const AdminDashboard = () => {
         setImportMode('5'); // Reset limit to default when selecting a new comic
         setSelectedChapterIdxs([]); // Reset manual selections
         setCustomChapterNumbers({}); // Reset manual numbers
+        setCustomChapterTitles({}); // Reset manual titles
+        setEditedAuthor('');
+        setEditedDescription('');
         setDetailLoading(true);
         setErrorMsg('');
         setProgress({ state: 'Đang trích xuất dữ liệu truyện...', percent: 10 });
@@ -152,6 +160,8 @@ const AdminDashboard = () => {
                 ...comic,
                 detail: detail
             });
+            setEditedAuthor(detail.author || 'Đang cập nhật');
+            setEditedDescription(detail.description || 'Chưa có thông tin nội dung.');
             setCustomCoverUrl('');
             setCustomCoverFile(null);
             setProgress({ state: `Hoàn tất parse dữ liệu từ ${sourceAPI.toUpperCase()}`, percent: 100 });
@@ -276,6 +286,7 @@ const AdminDashboard = () => {
 
                     const originalIdx = detail.chapters.indexOf(ch);
                     const finalChapterNumber = customChapterNumbers[originalIdx] !== undefined ? customChapterNumbers[originalIdx] : ch.chapterNumber;
+                    const finalChapterTitle = customChapterTitles[originalIdx] !== undefined ? customChapterTitles[originalIdx] : ch.title;
                     
                     let imageUrls;
                     if (sourceAPI === 'otruyen') imageUrls = await scrapeChapterImages(ch.url);
@@ -286,7 +297,7 @@ const AdminDashboard = () => {
                     
                     batchChapters.push({
                         chapterNumber: finalChapterNumber,
-                        title: ch.title,
+                        title: finalChapterTitle,
                         imageUrls: imageUrls
                     });
                 }
@@ -300,8 +311,8 @@ const AdminDashboard = () => {
                 const importPayload = {
                     title: detail.title,
                     coverUrl: detail.coverUrl,
-                    description: detail.description + (batchIdx === 0 ? descNote : ''),
-                    author: detail.author,
+                    description: editedDescription + (batchIdx === 0 ? descNote : ''),
+                    author: editedAuthor,
                     isAdult: isAdult,
                     categoryIds: selectedCategoryIds,
                     tagIds: selectedTagIds,
@@ -574,16 +585,28 @@ const AdminDashboard = () => {
                                 ) : selectedComic.detail ? (
                                     <div className="comic-detail-info animate-fade-in">
                                         
-                                        <div className="bg-dark bg-opacity-50 p-3 rounded-3 mb-4">
-                                            <div className="d-flex justify-content-between mb-2 pb-2 border-bottom border-secondary border-opacity-25">
-                                                <span className="text-secondary small fw-bold text-uppercase">Tác giả gốc</span>
-                                                <span className="fw-semibold text-end" style={{color: 'var(--text-primary)'}}>{selectedComic.detail.author}</span>
+                                        <div className="bg-dark bg-opacity-50 p-3 rounded-3 mb-4 border border-secondary border-opacity-50">
+                                            <div className="mb-3">
+                                                <label className="text-secondary small fw-bold text-uppercase mb-2">Tên Tác Giả</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-control form-control-sm border-secondary fw-semibold" 
+                                                    style={{backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)'}}
+                                                    value={editedAuthor}
+                                                    onChange={(e) => setEditedAuthor(e.target.value)}
+                                                />
                                             </div>
-                                            <div className="mt-3">
-                                                <span className="text-secondary small fw-bold text-uppercase d-block mb-2">Truyền Thuyết</span>
-                                                <p className="small lh-lg m-0 custom-scroll" style={{maxHeight: '120px', overflowY: 'auto', color: 'var(--text-primary)'}}>
-                                                    {selectedComic.detail.description}
-                                                </p>
+                                            <div className="mt-2">
+                                                <label className="text-secondary small fw-bold text-uppercase mb-2">Nội Dung Truyện</label>
+                                                <textarea 
+                                                    className="form-control form-control-sm border-secondary custom-scroll" 
+                                                    style={{height: '100px', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)'}}
+                                                    value={editedDescription}
+                                                    onChange={(e) => setEditedDescription(e.target.value)}
+                                                />
+                                                <small className="text-warning mt-1 d-block opacity-75">
+                                                    * Bạn có thể sửa nội dung gốc trước khi Import
+                                                </small>
                                             </div>
                                         </div>
                                         
@@ -720,30 +743,40 @@ const AdminDashboard = () => {
                                                             {[...selectedComic.detail.chapters].reverse().map((ch, reversedIdx) => {
                                                                 const originalIdx = selectedComic.detail.chapters.length - 1 - reversedIdx;
                                                                 return (
-                                                                <div key={originalIdx} className="form-check m-0 bg-dark rounded px-2 py-1 border border-secondary border-opacity-25 d-flex align-items-center gap-2" style={{width: 'calc(50% - 0.25rem)'}}>
-                                                                    <input 
-                                                                        className="form-check-input m-0 border-secondary flex-shrink-0" 
-                                                                        type="checkbox" 
-                                                                        id={`man_ch_${originalIdx}`}
-                                                                        checked={selectedChapterIdxs.includes(originalIdx)}
-                                                                        onChange={(e) => {
-                                                                            if (e.target.checked) setSelectedChapterIdxs([...selectedChapterIdxs, originalIdx]);
-                                                                            else setSelectedChapterIdxs(selectedChapterIdxs.filter(i => i !== originalIdx));
-                                                                        }}
-                                                                        style={{backgroundColor: selectedChapterIdxs.includes(originalIdx) ? '#0dcaf0' : 'rgba(255,255,255,0.1)'}}
-                                                                    />
-                                                                    <label className="form-check-label flex-grow-1 text-truncate" htmlFor={`man_ch_${originalIdx}`} style={{fontSize: '0.8rem', cursor: 'pointer', maxWidth: '60px', color: 'var(--text-primary)'}} title={ch.title}>
-                                                                        {ch.title}
-                                                                    </label>
-                                                                    <div className="input-group input-group-sm ms-auto" style={{width: '55px', flexShrink: 0}}>
+                                                                <div key={originalIdx} className="form-check m-0 bg-dark rounded px-2 py-2 border border-secondary border-opacity-25 mb-2 w-100 d-flex flex-column gap-2">
+                                                                    <div className="d-flex align-items-center gap-2">
+                                                                        <input 
+                                                                            className="form-check-input m-0 border-secondary flex-shrink-0" 
+                                                                            type="checkbox" 
+                                                                            id={`man_ch_${originalIdx}`}
+                                                                            checked={selectedChapterIdxs.includes(originalIdx)}
+                                                                            onChange={(e) => {
+                                                                                if (e.target.checked) setSelectedChapterIdxs([...selectedChapterIdxs, originalIdx]);
+                                                                                else setSelectedChapterIdxs(selectedChapterIdxs.filter(i => i !== originalIdx));
+                                                                            }}
+                                                                            style={{backgroundColor: selectedChapterIdxs.includes(originalIdx) ? '#0dcaf0' : 'rgba(255,255,255,0.1)'}}
+                                                                        />
+                                                                        <span className="text-secondary small fw-bold">Chap Index:</span>
                                                                         <input 
                                                                             type="number" 
                                                                             step="0.1"
-                                                                            className="form-control text-info border-info text-center px-0 py-0" 
-                                                                            style={{fontSize: '0.75rem', height: '22px', backgroundColor: 'var(--bg-secondary)'}}
+                                                                            className="form-control text-info border-info text-center px-1 py-0 fw-bold" 
+                                                                            style={{fontSize: '0.85rem', height: '24px', width: '70px', backgroundColor: 'var(--bg-secondary)'}}
                                                                             value={customChapterNumbers[originalIdx] !== undefined ? customChapterNumbers[originalIdx] : ch.chapterNumber}
                                                                             onChange={(e) => setCustomChapterNumbers({...customChapterNumbers, [originalIdx]: Number(e.target.value)})}
-                                                                            title="Sửa số thứ tự Chapter này"
+                                                                            title="Chỉ số sắp xếp của Chương (vd: 1, 1.5, 2)"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="d-flex align-items-center gap-2 ps-4">
+                                                                        <span className="text-secondary small fw-bold">Tên Hiển Thị:</span>
+                                                                        <input 
+                                                                            type="text" 
+                                                                            className="form-control flex-grow-1 text-light border-secondary px-2 py-0" 
+                                                                            style={{fontSize: '0.85rem', height: '24px', backgroundColor: 'var(--bg-secondary)'}}
+                                                                            value={customChapterTitles[originalIdx] !== undefined ? customChapterTitles[originalIdx] : ch.title}
+                                                                            onChange={(e) => setCustomChapterTitles({...customChapterTitles, [originalIdx]: e.target.value})}
+                                                                            title="Sửa Tên Chương hiển thị cho người đọc"
+                                                                            placeholder="Vd: Chapter 1 - Mở Đầu"
                                                                         />
                                                                     </div>
                                                                 </div>
