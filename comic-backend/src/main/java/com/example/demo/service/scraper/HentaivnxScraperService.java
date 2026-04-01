@@ -337,11 +337,13 @@ public class HentaivnxScraperService {
     // HELPERS
     // =============================================
     private Document getDocument(String url) throws IOException {
+        // CÁCH 1: Kết nối trực tiếp (hoạt động trên localhost)
         try {
-            return Jsoup.connect(url)
+            Document doc = Jsoup.connect(url)
                     .userAgent(USER_AGENT)
                     .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
                     .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                    .header("Referer", BASE_URL + "/")
                     .header("Cache-Control", "no-cache")
                     .header("Connection", "keep-alive")
                     .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
@@ -352,24 +354,74 @@ public class HentaivnxScraperService {
                     .header("Sec-Fetch-Site", "none")
                     .header("Sec-Fetch-User", "?1")
                     .header("Upgrade-Insecure-Requests", "1")
-                    .timeout(20000)
+                    .timeout(15000)
                     .get();
-        } catch (org.jsoup.HttpStatusException e) {
-            System.err.println("Direct connection failed for HentaiVNX. Status: " + e.getStatusCode() + ". Attempting proxy fallback... " + url);
-            try {
-                // Return via allorigins CORS proxy raw mode
-                return Jsoup.connect("https://api.allorigins.win/raw?url=" + java.net.URLEncoder.encode(url, "UTF-8"))
-                        .userAgent(USER_AGENT)
-                        .timeout(20000)
-                        .get();
-            } catch (Exception ex) {
-                System.err.println("AllOrigins proxy also failed. Attempting corsproxy.io...");
-                return Jsoup.connect("https://corsproxy.io/?" + url)
-                        .userAgent(USER_AGENT)
-                        .timeout(20000)
-                        .get();
+            // Kiểm tra xem trang có nội dung thật không (tránh trường hợp trả về trang block/captcha)
+            if (doc.select("a[href*=/truyen-hentai/]").size() > 0 || doc.select("img").size() > 3) {
+                return doc;
             }
+            System.err.println("HentaiVNX direct returned empty/blocked page. Falling back to proxy...");
+            throw new IOException("Blocked or empty page");
+        } catch (Exception e) {
+            System.err.println("HentaiVNX direct failed: " + e.getClass().getSimpleName() + " - " + e.getMessage() + ". URL: " + url);
         }
+
+        String encodedUrl;
+        try {
+            encodedUrl = java.net.URLEncoder.encode(url, "UTF-8");
+        } catch (Exception e) {
+            throw new IOException("Failed to encode URL: " + url, e);
+        }
+
+        // CÁCH 2: allorigins.win proxy
+        try {
+            System.err.println("Trying allorigins proxy for: " + url);
+            return Jsoup.connect("https://api.allorigins.win/raw?url=" + encodedUrl)
+                    .userAgent(USER_AGENT)
+                    .header("Accept", "text/html,*/*")
+                    .timeout(25000)
+                    .get();
+        } catch (Exception e) {
+            System.err.println("AllOrigins failed: " + e.getMessage());
+        }
+
+        // CÁCH 3: corsproxy.io
+        try {
+            System.err.println("Trying corsproxy.io for: " + url);
+            return Jsoup.connect("https://corsproxy.io/?" + encodedUrl)
+                    .userAgent(USER_AGENT)
+                    .header("Accept", "text/html,*/*")
+                    .timeout(25000)
+                    .get();
+        } catch (Exception e) {
+            System.err.println("corsproxy.io failed: " + e.getMessage());
+        }
+
+        // CÁCH 4: api.codetabs.com proxy
+        try {
+            System.err.println("Trying codetabs proxy for: " + url);
+            return Jsoup.connect("https://api.codetabs.com/v1/proxy?quest=" + encodedUrl)
+                    .userAgent(USER_AGENT)
+                    .header("Accept", "text/html,*/*")
+                    .timeout(25000)
+                    .get();
+        } catch (Exception e) {
+            System.err.println("codetabs proxy failed: " + e.getMessage());
+        }
+
+        // CÁCH 5: thingproxy
+        try {
+            System.err.println("Trying thingproxy for: " + url);
+            return Jsoup.connect("https://thingproxy.freeboard.io/fetch/" + url)
+                    .userAgent(USER_AGENT)
+                    .header("Accept", "text/html,*/*")
+                    .timeout(25000)
+                    .get();
+        } catch (Exception e) {
+            System.err.println("thingproxy failed: " + e.getMessage());
+        }
+
+        throw new IOException("All proxy strategies failed for URL: " + url);
     }
 
     private String extractSlug(String url) {

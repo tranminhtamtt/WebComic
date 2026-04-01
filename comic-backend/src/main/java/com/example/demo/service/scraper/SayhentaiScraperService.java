@@ -254,38 +254,67 @@ public class SayhentaiScraperService {
     // HELPER: GET DOCUMENT WITH PROXY FALLBACK
     // =============================================
     private Document getDocument(String url) throws IOException {
+        // CÁCH 1: Kết nối trực tiếp
         try {
-            return Jsoup.connect(url)
+            Document doc = Jsoup.connect(url)
                     .userAgent(USER_AGENT)
                     .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
                     .header("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+                    .header("Referer", BASE_URL + "/")
                     .header("Cache-Control", "no-cache")
                     .header("Connection", "keep-alive")
-                    .header("Sec-Ch-Ua", "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"")
-                    .header("Sec-Ch-Ua-Mobile", "?0")
-                    .header("Sec-Ch-Ua-Platform", "\"Windows\"")
                     .header("Sec-Fetch-Dest", "document")
                     .header("Sec-Fetch-Mode", "navigate")
-                    .header("Sec-Fetch-Site", "none")
-                    .header("Sec-Fetch-User", "?1")
                     .header("Upgrade-Insecure-Requests", "1")
-                    .timeout(20000)
+                    .timeout(15000)
                     .get();
-        } catch (org.jsoup.HttpStatusException e) {
-            System.err.println("Direct connection failed for SayHentai. Status: " + e.getStatusCode() + ". Attempting proxy fallback... " + url);
-            try {
-                // Return via allorigins CORS proxy raw mode
-                return Jsoup.connect("https://api.allorigins.win/raw?url=" + java.net.URLEncoder.encode(url, "UTF-8"))
-                        .userAgent(USER_AGENT)
-                        .timeout(20000)
-                        .get();
-            } catch (Exception ex) {
-                System.err.println("AllOrigins proxy also failed. Attempting corsproxy.io...");
-                return Jsoup.connect("https://corsproxy.io/?" + url)
-                        .userAgent(USER_AGENT)
-                        .timeout(20000)
-                        .get();
+            if (doc.select("img").size() > 2 || doc.select("a").size() > 5) {
+                return doc;
             }
+            throw new IOException("Empty/blocked page");
+        } catch (Exception e) {
+            System.err.println("SayHentai direct failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
+
+        String encodedUrl;
+        try {
+            encodedUrl = java.net.URLEncoder.encode(url, "UTF-8");
+        } catch (Exception e) {
+            throw new IOException("Failed to encode URL", e);
+        }
+
+        // CÁCH 2: allorigins
+        try {
+            return Jsoup.connect("https://api.allorigins.win/raw?url=" + encodedUrl)
+                    .userAgent(USER_AGENT).timeout(25000).get();
+        } catch (Exception e) {
+            System.err.println("AllOrigins failed for SayHentai: " + e.getMessage());
+        }
+
+        // CÁCH 3: corsproxy.io
+        try {
+            return Jsoup.connect("https://corsproxy.io/?" + encodedUrl)
+                    .userAgent(USER_AGENT).timeout(25000).get();
+        } catch (Exception e) {
+            System.err.println("corsproxy.io failed for SayHentai: " + e.getMessage());
+        }
+
+        // CÁCH 4: codetabs
+        try {
+            return Jsoup.connect("https://api.codetabs.com/v1/proxy?quest=" + encodedUrl)
+                    .userAgent(USER_AGENT).timeout(25000).get();
+        } catch (Exception e) {
+            System.err.println("codetabs failed for SayHentai: " + e.getMessage());
+        }
+
+        // CÁCH 5: thingproxy
+        try {
+            return Jsoup.connect("https://thingproxy.freeboard.io/fetch/" + url)
+                    .userAgent(USER_AGENT).timeout(25000).get();
+        } catch (Exception e) {
+            System.err.println("thingproxy failed for SayHentai: " + e.getMessage());
+        }
+
+        throw new IOException("All proxy strategies failed for URL: " + url);
     }
 }
