@@ -16,6 +16,7 @@ import com.cloudinary.utils.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class AdminImportController {
 
     @SuppressWarnings("unchecked")
     @PostMapping("/import-comic")
+    @Transactional
     public ResponseEntity<?> importComic(@RequestBody Map<String, Object> data) {
         try {
             String title = (String) data.get("title");
@@ -161,18 +163,19 @@ public class AdminImportController {
                     chapter = chapterService.save(chapter);
                     chaptersAdded++;
 
-                    // Import chapter images
+                    // Batch insert tất cả ảnh của chapter cùng lúc (thay vì từng ảnh một)
                     List<String> imageUrls = (List<String>) chapterData.get("imageUrls");
-                    if (imageUrls != null) {
+                    if (imageUrls != null && !imageUrls.isEmpty()) {
+                        List<ChapterImage> images = new java.util.ArrayList<>(imageUrls.size());
                         for (int i = 0; i < imageUrls.size(); i++) {
-                            ChapterImage image = ChapterImage.builder()
+                            images.add(ChapterImage.builder()
                                     .chapter(chapter)
                                     .pageNumber(i + 1)
                                     .imageUrl(imageUrls.get(i))
                                     .publicId("scraped_" + slug + "_ch" + chapterNumberObj + "_p" + (i + 1))
-                                    .build();
-                            chapterImageService.save(image);
+                                    .build());
                         }
+                        chapterImageService.saveAll(images); // Batch INSERT — nhanh gấp 5-10x
                     }
                 }
             }
