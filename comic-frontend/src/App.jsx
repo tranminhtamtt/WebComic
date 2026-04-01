@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './configurations/ThemeContext';
 import { AuthProvider } from './configurations/AuthContext';
@@ -15,7 +16,21 @@ import AdminComicManager from './pages/AdminComicManager';
 
 import Footer from './components/Footer';
 
+// Keepalive: Ping backend mỗi 4 phút để tránh Render spin down
+const PING_URL = (import.meta.env.VITE_API_BASE_URL || '').replace('/api', '') + '/api/ping';
+const PING_INTERVAL = 4 * 60 * 1000; // 4 phút
+
 function App() {
+  // Keepalive: tự động ping backend mỗi 4 phút khi user đang mở web
+  useEffect(() => {
+    const pingBackend = () => {
+      fetch(PING_URL, { method: 'GET', mode: 'cors' }).catch(() => {});
+    };
+    pingBackend(); // Ping ngay khi mở web
+    const interval = setInterval(pingBackend, PING_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>

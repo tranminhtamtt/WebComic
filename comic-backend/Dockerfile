@@ -20,4 +20,13 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Chạy ứng dụng - Giới hạn RAM cho Render Free Tier (512MB)
-ENTRYPOINT ["java", "-Xmx400m", "-Xms256m", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+  "-Xmx300m", \
+  "-Xms128m", \
+  "-XX:+UseSerialGC", \
+  "-XX:+UseContainerSupport", \
+  "-XX:MaxRAMPercentage=70.0", \
+  "-XX:+TieredCompilation", \
+  "-XX:TieredStopAtLevel=1", \
+  "-Dsun.net.inetaddr.ttl=60", \
+  "-jar", "app.jar"]
