@@ -5,6 +5,7 @@ import * as mangaDexAPI from '../services/mangadexService';
 import * as damconuongAPI from '../services/damconuongService';
 import * as hentaivnxAPI from '../services/hentaivnxService';
 import * as sayhentaiAPI from '../services/sayhentaiService';
+import * as tooNilyAPI from '../services/tooNilyService';
 import { LogOut, RefreshCw, LayoutGrid, CheckCircle, DatabaseZap, Search, Eye, AlertTriangle, ChevronRight, DownloadCloud, Layers, Globe } from 'lucide-react';
 import axios from 'axios';
 import '../style/admin.css';
@@ -92,6 +93,7 @@ const AdminDashboard = () => {
             else if (sourceAPI === 'damconuong') data = await damconuongAPI.scrapeComicList();
             else if (sourceAPI === 'hentaivnx') data = await hentaivnxAPI.scrapeComicList(fetchType);
             else if (sourceAPI === 'sayhentai') data = await sayhentaiAPI.scrapeComicList(fetchType);
+            else if (sourceAPI === 'toonily') data = await tooNilyAPI.scrapeComicList(fetchType);
             
             setScrapedList(data);
         } catch (error) {
@@ -117,6 +119,7 @@ const AdminDashboard = () => {
             else if (sourceAPI === 'damconuong') data = await damconuongAPI.searchComic(searchQuery);
             else if (sourceAPI === 'hentaivnx') data = await hentaivnxAPI.searchComic(searchQuery);
             else if (sourceAPI === 'sayhentai') data = await sayhentaiAPI.searchComic(searchQuery);
+            else if (sourceAPI === 'toonily') data = await tooNilyAPI.searchComic(searchQuery);
             
             setScrapedList(data);
         } catch (error) {
@@ -154,6 +157,10 @@ const AdminDashboard = () => {
             } else if (sourceAPI === 'sayhentai') {
                 detail = await sayhentaiAPI.scrapeComicDetail(comic.url);
                 setIsAdult(true);
+            } else if (sourceAPI === 'toonily') {
+                detail = await tooNilyAPI.scrapeComicDetail(comic.url);
+                // Toonily tự detect isAdult từ genres (Adult/Mature/Smut/Ecchi)
+                setIsAdult(detail.isAdult === true);
             }
             
             setSelectedComic({
@@ -294,6 +301,7 @@ const AdminDashboard = () => {
                     else if (sourceAPI === 'damconuong') imageUrls = await damconuongAPI.scrapeChapterImages(ch.url);
                     else if (sourceAPI === 'hentaivnx') imageUrls = await hentaivnxAPI.scrapeChapterImages(ch.url);
                     else if (sourceAPI === 'sayhentai') imageUrls = await sayhentaiAPI.scrapeChapterImages(ch.url);
+                    else if (sourceAPI === 'toonily') imageUrls = await tooNilyAPI.scrapeChapterImages(ch.url);
                     
                     batchChapters.push({
                         chapterNumber: finalChapterNumber,
@@ -384,57 +392,67 @@ const AdminDashboard = () => {
                 <div className="col-lg-6 animate-fade-in" style={{animationDelay: "0.3s"}}>
                     {/* Comic List */}
                     <div className="admin-glass-card p-4 h-100 position-relative">
-                        <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 gap-3 border-bottom border-secondary border-opacity-25">
-                            <h5 className="mb-0 d-flex align-items-center gap-2 fw-bold text-nowrap" style={{color: 'var(--text-primary)'}}>
-                                <LayoutGrid size={22} className="text-info"/> 
-                                Kho Dữ Liệu Nguồn Cấp
-                            </h5>
-                            
-                            {/* Source Toggle */}
-                            <div className="btn-group border border-secondary border-opacity-50 p-1 rounded-pill shadow-sm" role="group" style={{backgroundColor: 'var(--bg-secondary)'}}>
+                        <div className="d-flex flex-column gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                            <div className="d-flex justify-content-between align-items-center gap-3">
+                                <h5 className="mb-0 d-flex align-items-center gap-2 fw-bold text-nowrap" style={{color: 'var(--text-primary)'}}>
+                                    <LayoutGrid size={22} className="text-info"/> 
+                                    Kho Dữ Liệu Nguồn Cấp
+                                </h5>
+                                <button className="admin-btn-refresh px-4 py-2 d-flex align-items-center gap-2 text-nowrap" 
+                                        onClick={handleFetchList} disabled={loadingList}>
+                                    <RefreshCw size={16} className={loadingList ? "fa-spin" : ""} />
+                                    Tải Mới
+                                </button>
+                            </div>
+
+                            {/* Source Toggle — flex-wrap để tự xuống dòng khi nhiều nút */}
+                            <div className="d-flex flex-wrap gap-2 p-2 rounded-3 border border-secondary border-opacity-50 shadow-sm" style={{backgroundColor: 'var(--bg-secondary)'}}>
                                 <input type="radio" className="btn-check" name="sourceAPI" id="btnOtruyen" autoComplete="off" 
                                     checked={sourceAPI === 'otruyen'} 
                                     onChange={() => { setSourceAPI('otruyen'); setScrapedList([]); setSearchQuery(''); }} />
-                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'otruyen' ? 'btn-info text-dark shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnOtruyen" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'otruyen' ? 'btn-info text-dark shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnOtruyen" style={{fontSize: '0.85rem'}}>
                                     🇻🇳 Otruyen
                                 </label>
 
                                 <input type="radio" className="btn-check" name="sourceAPI" id="btnMangadex" autoComplete="off" 
                                     checked={sourceAPI === 'mangadex'} 
                                     onChange={() => { setSourceAPI('mangadex'); setScrapedList([]); setSearchQuery(''); }} />
-                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'mangadex' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnMangadex" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'mangadex' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnMangadex" style={{fontSize: '0.85rem'}}>
                                     <Globe size={14}/> MangaDex
                                 </label>
 
                                 <input type="radio" className="btn-check" name="sourceAPI" id="btnDamconuong" autoComplete="off" 
                                     checked={sourceAPI === 'damconuong'} 
                                     onChange={() => { setSourceAPI('damconuong'); setScrapedList([]); setSearchQuery(''); }} />
-                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'damconuong' ? 'btn-warning text-dark shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnDamconuong" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'damconuong' ? 'btn-warning text-dark shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnDamconuong" style={{fontSize: '0.85rem'}}>
                                     🔞 Dâm Cô Nương
                                 </label>
 
                                 <input type="radio" className="btn-check" name="sourceAPI" id="btnHentaivnx" autoComplete="off" 
                                     checked={sourceAPI === 'hentaivnx'} 
                                     onChange={() => { setSourceAPI('hentaivnx'); setScrapedList([]); setSearchQuery(''); }} />
-                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'hentaivnx' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnHentaivnx" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'hentaivnx' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnHentaivnx" style={{fontSize: '0.85rem'}}>
                                     🔥 HentaiVNX
                                 </label>
 
                                 <input type="radio" className="btn-check" name="sourceAPI" id="btnSayhentai" autoComplete="off" 
                                     checked={sourceAPI === 'sayhentai'} 
                                     onChange={() => { setSourceAPI('sayhentai'); setScrapedList([]); setSearchQuery(''); }} />
-                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'sayhentai' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnSayhentai" style={{fontSize: '0.85rem', color: 'var(--text-primary)'}}>
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'sayhentai' ? 'btn-danger text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnSayhentai" style={{fontSize: '0.85rem'}}>
                                     🍇 SayHentai
                                 </label>
-                            </div>
 
-                            <button className="admin-btn-refresh px-4 py-2 d-flex align-items-center gap-2 text-nowrap" 
-                                    onClick={handleFetchList} disabled={loadingList}>
-                                <RefreshCw size={16} className={loadingList ? "fa-spin" : ""} />
-                                Tải Mới
-                            </button>
+                                <input type="radio" className="btn-check" name="sourceAPI" id="btnToonily" autoComplete="off" 
+                                    checked={sourceAPI === 'toonily'} 
+                                    onChange={() => { setSourceAPI('toonily'); setScrapedList([]); setSearchQuery(''); }} />
+                                <label className={`btn rounded-pill px-3 py-1 m-0 fw-semibold d-flex align-items-center gap-2 text-nowrap ${sourceAPI === 'toonily' ? 'btn-primary text-light shadow' : 'btn-outline-secondary border-0 opacity-50'}`} htmlFor="btnToonily" style={{fontSize: '0.85rem'}}>
+                                    🌙 Toonily
+                                </label>
+                            </div>
                         </div>
+
                         
+
                         {/* Bộ lọc Dữ Liệu */}
                         <div className="d-flex flex-wrap align-items-center gap-2 mb-3" style={{ opacity: searchQuery.trim() ? 0.4 : 1, pointerEvents: searchQuery.trim() ? 'none' : 'auto', transition: 'all 0.3s ease' }}>
                             <button className={`btn btn-sm px-3 rounded-pill fw-bold ${!searchQuery.trim() && fetchType === 'latest' ? 'btn-primary' : 'btn-outline-secondary opacity-75'}`} style={{color: !searchQuery.trim() && fetchType === 'latest' ? '' : 'var(--text-primary)'}} onClick={() => setFetchType('latest')}>🕒 Mới Cập Nhật</button>
